@@ -1,7 +1,7 @@
 title = "VeryGood Graphics"
 baseURL = "https://blog.verygoodgraphics.com/"
 languageCode = "en-us"
-theme = ["jane"]
+theme = ["github.com/xianmin/hugo-theme-jane"]
 
 enableRobotsTXT = true
 enableEmoji = true
