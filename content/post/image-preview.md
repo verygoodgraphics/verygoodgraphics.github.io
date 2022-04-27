@@ -6,10 +6,10 @@ draft: false
 tags: ["preview", "image", "shortcodes", "tag-7"]
 categories: ["docs", "shortcodes", "index"]
 
-menu:
-  main:
-    parent: "docs"
-    weight: 3
+#menu:
+#  main:
+#    parent: "docs"
+#    weight: 3
 ---
 
 Thanks for [liwenyip/hugo-easy-gallery](https://github.com/liwenyip/hugo-easy-gallery) & [Zebradil · Pull Request #48](https://github.com/xianmin/hugo-theme-jane/pull/48) .

@@ -19,10 +19,10 @@ contentCopyright: '<a href="https://github.com/gohugoio/hugoBasicExample" rel="n
 # reward: false
 mathjax: true
 
-menu:
-  main:
-    parent: "docs"
-    weight: 1
+#menu:
+#  main:
+#    parent: "docs"
+#    weight: 1
 ---
 
 **Markdown** is created by [Daring Fireball](http://daringfireball.net/), the original guideline is [here](http://daringfireball.net/projects/markdown/syntax). Its syntax, however, varies between different parsers or editors.
