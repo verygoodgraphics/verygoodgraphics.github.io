@@ -4,6 +4,6 @@
 
 resources/_gen
 public
-themes
+#themes
 .hugo_build.lock
 go.sum

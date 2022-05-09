@@ -1,7 +1,7 @@
 title = "Very Good Graphics"
 baseURL = "https://blog.verygoodgraphics.com/"
 languageCode = "en-us"
-theme = ["github.com/xianmin/hugo-theme-jane"]
+theme = ["jane"]
 
 enableRobotsTXT = true
 enableEmoji = true
@@ -12,14 +12,22 @@ disqusShortname = "VGG"      # disqus_shortname
 googleAnalytics = ""      # UA-XXXXXXXX-X
 copyright = "VeryGoodGraphics"            # default: author.name ↓        # 默认为下面配置的author.name ↓
 
+PygmentsCodeFences = true # Enable syntax highlighting with GitHub flavoured code fences
+PygmentsUseClasses = true # Use CSS classes to format highlighted code
+PygmentsCodefencesGuessSyntax = true
+PygmentsOptions = "linenos=table"
+
+
 # language support # en / zh-cn / other... translations present in i18n/
 defaultContentLanguage = "en"           # Default language to use
 [languages.en]
 title = "Very Good Graphics Blog"
+languageName = "English"
 languageCode = "en"
 
 [languages.zh-cn]
 title = "Very Good Graphics Blog"
+languageName = "中文"
 languageCode = "zh-cn"
 
 [author]                  # essential                     # 必需
@@ -63,6 +71,10 @@ description = "Very Good Graphics Blog"
 
 # The date format to use; for a list of valid formats, see https://gohugo.io/functions/format/
 dateFormatToUse = "2006-01-02"
+
+# show language chooser in menu
+showMenuLanguageChooser = true
+
 
 # 一些全局开关，你也可以在每一篇内容的 front matter 中针对单篇内容关闭或开启某些功能，在 archetypes/default.md 查看更多信息。
 # Some global options, you can also close or open something in front matter for a single post, see more information from `archetypes/default.md`.
