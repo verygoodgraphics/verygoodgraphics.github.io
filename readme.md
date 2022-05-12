@@ -1,12 +1,7 @@
-Hello VeryGoodGraphics Blog!
+This is Blog for VeryGoodGraphics, based on a [forked hugo theme](https://github.com/verygoodgraphics/hugo-theme-jane) of [Jane](https://github.com/xianmin/hugo-theme-jane).
 
-## quick start
+## Quick Start
 
-0. 配置 go version >= 1.18, `brew install hugo`
-
-## 参考theme
-
-在`theme/exampleSite/content`目录下查看使用方式
-
-1. `git clone https://github.com/xianmin/hugo-theme-jane.git themes/jane`
-2. `hugo server`
+1. Install `hugo`
+2. Checkout theme using git submodule: `git submodule update --init`
+3. Running with `hugo server -D`
