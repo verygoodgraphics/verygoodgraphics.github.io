@@ -26,11 +26,9 @@ defaultContentLanguage = "en"           # Default language to use
 [languages.en]
   title = "Very Good Graphics Blog"
   languageName = "English"
-  languageCode = "en-us"
 [languages.zh-cn]
   title = "Very Good Graphics Blog"
   languageName = "中文"
-  languageCode = "zh-cn"
 
 [[menu.main]]             # config your menu              # 配置目录
   name = "Blog"
