@@ -38,7 +38,9 @@ Writing HTML[^wh] [sucks](https://rogovoy.me/blog/writing-html-sucks).
 
 It is very interesting. Because HTML, short for `Hyper Text Markup Language`, was originally invented thirty years ago for making **linkable** documents, rather than apps. It is more about **markup** than a language. The majority doesn't even take writing HTML as programming, since it is not a programming language at all.
 
-It was not until the advent of HTML5, which is commonly referred to as **H5**, together with CSS3 and modern versions of JavaScript, that people were starting to make Web apps.
+It was not until the advent of HTML5, which is commonly referred to as **H5**, together with CSS3 and modern versions of JavaScript, that people were starting to make **real** Web apps.[^webapp]
+
+[^webapp]: Actually the trend started more earlier with the advent of Web 2.0 and AJAX technology, but those made are more of web-site than web-app, like Facebook.
 
 And thanks to the optimization team of browser vendors, nowadays the performance of JavaScript gains the magnitude-level improvements so that the **interactive** web apps won't be bottle-necked.
 
