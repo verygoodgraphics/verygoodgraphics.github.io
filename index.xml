@@ -4,7 +4,7 @@
 &lt;h2 id="the-web-technologies">The Web Technologies&lt;/h2>
 &lt;p>Writing HTML&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup> &lt;a href="https://rogovoy.me/blog/writing-html-sucks">sucks&lt;/a>.&lt;/p>
 &lt;p>It is very interesting. Because HTML, short for &lt;code>Hyper Text Markup Language&lt;/code>, was originally invented thirty years ago for making &lt;strong>linkable&lt;/strong> documents, rather than apps. It is more about &lt;strong>markup&lt;/strong> than a language. The majority doesn&amp;rsquo;t even take writing HTML as programming, since it is not a programming language at all.&lt;/p>
-&lt;p>It was not until the advent of HTML5, which is commonly referred to as &lt;strong>H5&lt;/strong>, together with CSS3 and modern versions of JavaScript, that people were starting to make Web apps.&lt;/p>
+&lt;p>It was not until the advent of HTML5, which is commonly referred to as &lt;strong>H5&lt;/strong>, together with CSS3 and modern versions of JavaScript, that people were starting to make &lt;strong>real&lt;/strong> Web apps.&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>&lt;/p>
 &lt;p>And thanks to the optimization team of browser vendors, nowadays the performance of JavaScript gains the magnitude-level improvements so that the &lt;strong>interactive&lt;/strong> web apps won&amp;rsquo;t be bottle-necked.&lt;/p>
 &lt;link rel="stylesheet" href="https://blog.verygoodgraphics.com/css/hugo-easy-gallery.css" />
 &lt;div class="box">
@@ -19,7 +19,7 @@ style="max-width:50%" >
 &lt;/div>
 &lt;p>Do you remember this famous picture? It&amp;rsquo;s from &lt;a href="https://hacks.mozilla.org/2017/02/a-cartoon-intro-to-webassembly/">Lin Clark&lt;/a> when she tries to introduce the performance history of JavaScript. The performance started to boost from 2008 and is still not reaching the end.&lt;/p>
 &lt;p>The benefit is great for app end-users, however, writing HTML still sucks for coders.&lt;/p>
-&lt;p>When we have so-called Front-end Frameworks, such as React, Vue, Angular and etc, and is overwhelmed by the booming of front-end ecosystems&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>, we still need to write &lt;strong>HTML-like&lt;/strong> code and tweak styles carefully with CSS or one of its variants.&lt;/p>
+&lt;p>When we have so-called Front-end Frameworks, such as React, Vue, Angular and etc, and is overwhelmed by the booming of front-end ecosystems&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>, we still need to write &lt;strong>HTML-like&lt;/strong> code and tweak styles carefully with CSS or one of its variants.&lt;/p>
 &lt;p>It&amp;rsquo;s slow and boring.&lt;/p>
 &lt;p>Tens of thousands of greatest minds are wasted on implementing those visual interfaces, using a technology stack that was not originally intended for. Those tasks are not limited to tweaking styles back-and-forth, as well as thinking about browser compatibility issues, weird CSS hacks, performance caveats and so on.&lt;/p>
 &lt;p>And No-Code &lt;a href="https://rogovoy.me/blog/writing-html-sucks">doesn&amp;rsquo;t help&lt;/a> either. Anyway, seldom No-Code products are solving problems for coders.&lt;/p>
@@ -40,7 +40,7 @@ style="max-width:50%" >
 &lt;/li>
 &lt;/ul>
 &lt;p>As the ratio of web apps is increasing over the years, the platform-specific or cross-platform frameworks mentioned above are less used since they are often targeting traditional desktop applications.&lt;/p>
-&lt;p>And the developer experience is even worse than writing HTML because they may be obliged to write &lt;em>imperative&lt;/em> and &lt;em>object-oriented&lt;/em> code like this&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>,&lt;/p>
+&lt;p>And the developer experience is even worse than writing HTML because they may be obliged to write &lt;em>imperative&lt;/em> and &lt;em>object-oriented&lt;/em> code like this&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup>,&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -67,7 +67,7 @@ style="max-width:50%" >
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">stack.add_child(button)
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>rather than writing &lt;strong>declarative&lt;/strong> and possibly &lt;strong>reactive&lt;/strong> code that programmer always dreams of, like this.&lt;sup id="fnref1:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>&lt;/p>
+&lt;/div>&lt;p>rather than writing &lt;strong>declarative&lt;/strong> and possibly &lt;strong>reactive&lt;/strong> code that programmer always dreams of, like this.&lt;sup id="fnref1:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup>&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -102,7 +102,7 @@ style="max-width:50%" >
 &lt;p>Though some people don&amp;rsquo;t like Flutter because it introduces another new and unfamiliar language as well as extra VM burden, which is likely the result of technical bureaucracy.&lt;/p>
 &lt;p>The real problem of Flutter lies in the compatibility with existing ecosystems, as people are inclined to reuse existing resources and sticking to old but mature apps. And programming language matters for the same reason.&lt;/p>
 &lt;p>And it also explains why the JavaScript version of Flutter was tried by some gifted and insightful people. But it failed as Flutter itself is rapidly changing its internals so that it won&amp;rsquo;t catch up. Thankfully, as all work pays off, it gave birth to the &lt;a href="https://github.com/openkraken/kraken">Kraken&lt;/a> framework, which allows coders to write HTML, and uses Flutter as the basis for cross-platform rendering.&lt;/p>
-&lt;p>Wait&amp;hellip; What? Writing HTML again in non-web frameworks&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup>?&lt;/p>
+&lt;p>Wait&amp;hellip; What? Writing HTML again in non-web frameworks&lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup>?&lt;/p>
 &lt;h2 id="design-to-code">Design-to-Code&lt;/h2>
 &lt;p>No, no more writing HTML!&lt;/p>
 &lt;p>Still, we have to admit that HTML+CSS is a good combination to represent UI, as&lt;/p>
@@ -117,7 +117,7 @@ style="max-width:50%" >
 &lt;li>Add business logic to the UI he or she just re-implemented.&lt;/li>
 &lt;/ol>
 &lt;p>The first part is always the source of pain. It has plenty of details. It is time-consuming. It needs discussions with designers, back-and-forth. The communication cost is expensive. If the design updates, the code needs update too, and maybe another costly discussion is needed.&lt;/p>
-&lt;p>And not to mention that, this kind of job is usually seen as low-ended, and thus the so-called front-end programmer is usually looked down upon by other non-front-end programmers.&lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup>&lt;/p>
+&lt;p>And not to mention that, this kind of job is usually seen as low-ended, and thus the so-called front-end programmer is usually looked down upon by other non-front-end programmers.&lt;sup id="fnref:8">&lt;a href="#fn:8" class="footnote-ref" role="doc-noteref">8&lt;/a>&lt;/sup>&lt;/p>
 &lt;p>Some clever people came out of the solution of &lt;strong>Design-to-Code&lt;/strong> using compiler, or more specifically, the transpiler technique, which turns the whole high-fidelity design into machine-generated HTML+CSS code.&lt;/p>
 &lt;p>It sounds adorable, but it is catering for PMs and designers, rather than developers. The nasty intrinsics include but is not limited to&lt;/p>
 &lt;ul>
@@ -146,19 +146,22 @@ style="max-width:50%" >
 &lt;p>Here writing HTML actually means writing HTML+CSS.&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:3">
-&lt;p>Let&amp;rsquo;s take the number of NPM packages for example, and we will see.&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>Actually the trend started more earlier with the advent of Web 2.0 and AJAX technology, but those made are more of web-site than web-app, like Facebook.&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:4">
-&lt;p>Code samples taken from Raph Levien&amp;rsquo;s &lt;a href="https://raphlinus.github.io/ui/druid/2019/11/22/reactive-ui.html">&lt;em>Towards a unified theory of reactive UI&lt;/em>&lt;/a>&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&amp;#160;&lt;a href="#fnref1:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>Let&amp;rsquo;s take the number of NPM packages for example, and we will see.&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:5">
-&lt;p>But there is Qt Designer that will do the dirty work for Qt developers.&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>Code samples taken from Raph Levien&amp;rsquo;s &lt;a href="https://raphlinus.github.io/ui/druid/2019/11/22/reactive-ui.html">&lt;em>Towards a unified theory of reactive UI&lt;/em>&lt;/a>&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&amp;#160;&lt;a href="#fnref1:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:6">
-&lt;p>Similar work is done in &lt;a href="https://reactnative.dev/">React Native&lt;/a>, which allows coding in React but rendering with native system widgets.&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>But there is Qt Designer that will do the dirty work for Qt developers.&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;li id="fn:7">
-&lt;p>One evidence is that front-end programmer gets lower salary standard. The FE programmers always come and go, but good FE programmer is rare and is eagerly demanded by the market, which is really weird.&amp;#160;&lt;a href="#fnref:7" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;p>Similar work is done in &lt;a href="https://reactnative.dev/">React Native&lt;/a>, which allows coding in React but rendering with native system widgets.&amp;#160;&lt;a href="#fnref:7" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:8">
+&lt;p>One evidence is that front-end programmer gets lower salary standard. The FE programmers always come and go, but good FE programmer is rare and is eagerly demanded by the market, which is really weird.&amp;#160;&lt;a href="#fnref:8" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
 &lt;/div></description></item></channel></rss>
