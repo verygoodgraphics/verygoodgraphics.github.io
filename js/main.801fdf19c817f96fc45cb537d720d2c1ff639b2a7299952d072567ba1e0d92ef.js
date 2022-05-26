@@ -157,8 +157,16 @@ var fnTooltip = function () {
       footnote = $(document.getElementById(id)).clone(),
       outer_wrapper = $("<span>", { "class": "fn-content" }),
       inner_wrapper = $("<span>", { "class": "fn-text" });
-    footnote.find(".footnote-return").remove();
-    $(this).append(outer_wrapper.append(inner_wrapper.html(footnote.html())));
+
+    // fix structure changes
+    $(this).removeClass("footnote-ref");
+    $(this).parent().addClass("footnote-ref");
+
+    // add note only if non-empty
+    if (footnote.html()) {
+      footnote.find(".footnote-backref").remove();
+      $(this).parent().append(outer_wrapper.append(inner_wrapper.text(footnote.text().trim())));
+    }
   });
 
   // fix tooltip position & width
