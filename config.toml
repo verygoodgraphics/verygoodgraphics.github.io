@@ -110,3 +110,13 @@ defaultContentLanguage = "en"           # Default language to use
 
   [params.social]                                         # 社交链接
     g-github = "https://github.com/verygoodgraphics"
+
+  [params.counter.busuanzi]  # a Chinese visitor counter  # 不蒜子计数器
+    enable = true
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.extensions]
+      footnote = true
+    [markup.goldmark.renderer]
+      unsafe = true
