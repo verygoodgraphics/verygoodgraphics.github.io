@@ -6,7 +6,7 @@ draft: false
 keywords: []
 description: ""
 tags: []
-categories: []
+categories: ["VGG Products"]
 author: Harry
 
 # You can also close(false) or open(true) something for this content.
