@@ -1,4 +1,492 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Very Good Graphics Blog</title><link>https://blog.verygoodgraphics.com/</link><description>Recent content on Very Good Graphics Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>VeryGoodGraphics</copyright><lastBuildDate>Wed, 14 Sep 2022 21:28:17 +0800</lastBuildDate><atom:link href="https://blog.verygoodgraphics.com/index.xml" rel="self" type="application/rss+xml"/><item><title>ECS Architecture for GUI applications</title><link>https://blog.verygoodgraphics.com/posts/ecs/</link><pubDate>Wed, 14 Sep 2022 21:28:17 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/ecs/</guid><description>&lt;p>ECS, short for Entity-Component-System, is an architectural design pattern originally found in the video game programming. It is a powerful technique that allows easing the programming headaches as well as boosting the performance of a game containing huge amount of interactive objects.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Very Good Graphics Blog</title><link>https://blog.verygoodgraphics.com/</link><description>Recent content on Very Good Graphics Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>VeryGoodGraphics</copyright><lastBuildDate>Thu, 29 Sep 2022 15:36:14 +0800</lastBuildDate><atom:link href="https://blog.verygoodgraphics.com/index.xml" rel="self" type="application/rss+xml"/><item><title>Digging into Compiling C++ to WebAssembly</title><link>https://blog.verygoodgraphics.com/posts/cpp-wasm/</link><pubDate>Thu, 29 Sep 2022 15:36:14 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/cpp-wasm/</guid><description>&lt;p>The support of WebAssembly is a critical part of VGG engine, as we&lt;/p>
+&lt;ul>
+&lt;li>not only compile the whole engine to WebAssembly for running in browsers;&lt;/li>
+&lt;li>but also support user-generated wasm file in combination with designs to make a whole interactive app&lt;/li>
+&lt;/ul>
+&lt;p>By definition,&lt;/p>
+&lt;blockquote>
+&lt;p>WebAssembly is an executable binary format for a stack-based virtual machine.&lt;/p>
+&lt;/blockquote>
+&lt;p>and there have been so many blog posts, papers, and books help us disect the WebAssembly format. However, seldom articles talk about the compiling process of C++ programs to WebAssembly. Because there is a &lt;em>de-facto&lt;/em> tool called &lt;a href="https://emscripten.org/">Emscripten&lt;/a> which is devoted to this problem.&lt;/p>
+&lt;p>And nobody seems to have interest in the underlying mechanism of Emscripten.&lt;/p>
+&lt;p>In this article, we kept the record for digging into the compiling process from C++ to WebAssembly, thus demystifying Emscripten. Hope you enjoy it!&lt;/p>
+&lt;h2 id="background-of-webassembly">Background of WebAssembly&lt;/h2>
+&lt;p>Let&amp;rsquo;s start the story from JVM&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>, the most famous virtual machine in programming history. JVM-based languages is a collection of languages which obey the JVM specification, including Java, Clojure, Scala and Kotlin, so that they can run on JVM without cross-platform issues, while getting the power of JVM including GC&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>, exception handling, multithreading, atomic operands, etc.&lt;/p>
+&lt;p>WebAssembly format actually borrows a lot from the JVM specification. Some details can be peeked in the paper &lt;em>Bringing the Web up to Speed with WebAssembly&lt;/em>&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>. The authors also implemented a virtual machine to execute the WebAssembly format. As long as a programming language could be compiled to WebAssembly, it can be executed in this WebAssembly virtual machine. This is exactly what JVM does.&lt;/p>
+&lt;p>WebAssembly is designed for speeding up the Web. For example, we can use Photoshop in the browser. The ability of WebAssembly is greatly extended. It could help build portable standards for embedded devices, so that we can narrow the gap between embedded hardware and software. As a consequence, more devlopers using high-level programming language are able to deploy their products on tiny embedded hardware. It is the last puzzle of making everything intelligentization.&lt;/p>
+&lt;p>Besides, the blockchain community is paying more attention to WebAssembly. For example, Ethereum executes contracts in its own virtual machine called EVM&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>. These contracts are written by Solidity language, a derivative programming language from Go. Developers cannot port the contracts to other chain unless it also supports EVM. What will happen if we use WebAssembly as the virtual machine format? Developers can write contracts in any programming language, then compile them to WebAssembly format. The contract is portable to any chains which support WebAssembly virtual machine. And it is the next virtual machine generation for most newer blockchain projects. We believe it will be the future for DeFi infrastructure.&lt;/p>
+&lt;p>Rust and C++, the two programming languages, are the primarily supported languages for WebAssembly generation. WebAssembly has the same linear memory model and reference table design as the C++ language. And the compiling to WebAssembly binaries is supported by &lt;strong>Clang&lt;/strong>, which contains the WebAssembly target for LLVM&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> framework. Clang is the C++ compiler constructed with modules from LLVM. It focuses on translating C++ languages to LLVM IR&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup> and then uses some toolkits to generate executable binary files for the target platform.&lt;/p>
+&lt;p>To use the WebAssembly technology, we need to generate a wasm file and then execute it in the target environment. Generating a wasm file includes two steps, compiling and linking, which is the same as the C++ building process. Then the wasm file can be adapted with JavaScript and run in a browser, or just run in standalone runtime as an normal native process.&lt;/p>
+&lt;h2 id="preparation">Preparation&lt;/h2>
+&lt;p>It&amp;rsquo;s very convenient to set up a C++ WebAssembly building environment with &lt;code>emsdk&lt;/code>, which help us collect all the toolkits for compiling WebAssembly.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ git clone https://github.com/emscripten-core/emsdk.git
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>After downloading &lt;code>emsdk&lt;/code>, we will get all the tools under directory &lt;code>upstream&lt;/code>. We can check the installation by the command:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The &lt;code>clang&lt;/code> executable is downloaded directly from official LLVM releases, unmodified. If we want to build LLVM, we can follow the instructions from &lt;a href="https://github.com/llvm/llvm-project/blob/main/llvm/utils/release/test-release.sh">&lt;code>test_release.sh&lt;/code>&lt;/a>.&lt;/p>
+&lt;p>Please note, &lt;code>upstream/cache/sysroot&lt;/code> is a very important directory. It contains the header and library files for the subsequent compiling and linking.&lt;/p>
+&lt;h2 id="compile-c-to-webassembly-with-clang">Compile C++ to WebAssembly with Clang&lt;/h2>
+&lt;p>It is not easy to be a master at compiling C++ programs because the compiler has thousands of options to control the compiling and linking process. As a curious developer, we can debug the LLVM and clang source code to understand how it works. Let&amp;rsquo;s start from the famous &lt;code>hello world&lt;/code> program.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdio.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">printf&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;hello world&lt;/span>&lt;span class="se">\n&lt;/span>&lt;span class="s">&amp;#34;&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Here we include the header file of &lt;code>stdio.h&lt;/code>, which is contained in the C language library &lt;code>libc&lt;/code>. Emscripten uses &lt;code>musl&lt;/code> library and &lt;code>libc&lt;/code> library customized for &lt;code>wasi&lt;/code> environment, and copys the &lt;code>libcxx&lt;/code>, &lt;code>libcxxabi&lt;/code>, &lt;code>libunwind&lt;/code> from LLVM, which are used to support the C++ language features.&lt;/p>
+&lt;p>To show how to compile the program, we splits the progress into four stages: preprocessing, generating LLVM IR, generating assembly target object file, and linking.&lt;/p>
+&lt;h3 id="preprocessing">Preprocessing&lt;/h3>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang --target&lt;span class="o">=&lt;/span>wasm32 -E hello.c -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>--target=wasm32&lt;/code> defines the wasm32 target&lt;/li>
+&lt;li>&lt;code>-E&lt;/code> indicates that we only run preprocessing of the &lt;code>hello.c&lt;/code> file.&lt;/li>
+&lt;li>&lt;code>-v&lt;/code> will print the details of the execution process.&lt;/li>
+&lt;/ul>
+&lt;p>In the end, we will encounter the error&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">hello.c:1:10: fatal error: &amp;#39;stdio.h&amp;#39; file not found
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">#include &amp;lt;stdio.h&amp;gt;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>It is about the missing header file &lt;code>stdio.h&lt;/code>. C++ defines all function interfaces in header files. In the preprocessing step, the compiler will search the directories to find the header files. Here we are using the clang from &lt;code>emsdk&lt;/code>. So it can not find the correct header file. And we notice that the current header search directories only includes:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">ignoring nonexistent directory &amp;#34;/include&amp;#34;
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">#include &amp;#34;...&amp;#34; search starts here:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">#include &amp;lt;...&amp;gt; search starts here:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> /path/to/emsdk/upstream/lib/clang/15.0.0/include
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Then we can add &lt;code>-I&lt;/code> to append header search directory to resolve the problem. As usual we can add the system header include directory. But the system integrated headers and libraries are not adapted for WebAssembly. Emscripten offers all the basic headers and libraries required to build the wasm file. We can use the &lt;code>--sysroot=/path/to/emscripten/cache/sysroot&lt;/code> instead.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang --target&lt;span class="o">=&lt;/span>wasm32 --sysroot /path/to/emsdk/upstream/emscripten/cache/sysroot -E hello.c -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>--sysroot&lt;/code> is only required with option &lt;code>--target=wasm32&lt;/code>. So we can not use it in the normal C++ compilation process, otherwise it fails.&lt;/p>
+&lt;h3 id="llvm-intermediate-presentation-ir">LLVM Intermediate Presentation (IR)&lt;/h3>
+&lt;p>It is the most important design in LLVM, that any languages compiled to IR format, could reuse the target platform code generation and assembling, with lots of optimization libraries. So WebAssembly is derived from the IR format and other LLVM-based programming languages could also easily be transformed to WebAssembly format.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang --target&lt;span class="o">=&lt;/span>wasm32 -I /path/to/emsdk/upstream/emscripten/cache/sysroot/include -emit-llvm -S hello.c -o hello.ll -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>-I&lt;/code> is used to prepend header search directories&lt;/li>
+&lt;li>&lt;code>-S&lt;/code> indicates to generate LLVM assembly file&lt;/li>
+&lt;li>&lt;code>-emit-llvm&lt;/code> will produce the LLVM intermediate representation&lt;/li>
+&lt;li>&lt;code>-o hello.ll&lt;/code> the &lt;code>.ll&lt;/code> file format is the text format of IR&lt;/li>
+&lt;/ul>
+&lt;p>Besides, to understand how the optimization process works, we can add &lt;code>-O1&lt;/code>or &lt;code>-O2&lt;/code> and check the output. If we run the command without &lt;code>-emit-llvm&lt;/code>, we can get a pure assembly format text file.&lt;/p>
+&lt;p>As to Emscripten, we find it adapts some header files to support WebAssembly. The wasm file is executed in a virtual machine. Currently the WebAssembly instruction set does not support some system devices and kernel interfaces. So Emscripten needs to replace these functions when compiling.&lt;/p>
+&lt;h3 id="target-object-file">Target Object File&lt;/h3>
+&lt;p>In this stage, the clang will use the LLVM IR to generate target platform object files. So LLVM will handle all the following work to construct an executable binary file.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang --target&lt;span class="o">=&lt;/span>wasm32 -I /path/to/emsdk/upstream/emscripten/cache/sysroot/include -c hello.c -o hello.o -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>-c&lt;/code> option will produce the target compiled object file.&lt;/li>
+&lt;/ul>
+&lt;p>It produces the &lt;code>hello.o&lt;/code> binary file, which linker could resolve the symbols with and does some optimization work in the linking stage.&lt;/p>
+&lt;h3 id="linking">Linking&lt;/h3>
+&lt;p>Let&amp;rsquo;s run compiling and linking by separate command tools. Clang only chains the tools to complete building the executable target file. To show the linking progress, we only need to use the tool &lt;code>wasm-ld&lt;/code>, instead of &lt;code>ld&lt;/code>. More details could be found in &lt;a href="https://github.com/llvm/llvm-project/blob/main/clang/tools/driver/driver.cpp">driver.cpp&lt;/a>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/wasm-ld -o hello.wasm hello.o -L/path/to/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten -lc -lcompiler_rt --no-entry
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>wasm-ld&lt;/code> is the wasm linker in clang tools.&lt;/li>
+&lt;li>&lt;code>-o hello.wasm&lt;/code> indicates that the output is a wasm file.&lt;/li>
+&lt;li>&lt;code>hello.o&lt;/code> is the compiled object file.&lt;/li>
+&lt;li>&lt;code>-L...&lt;/code> prepends the object library search directory in the linking stage.&lt;/li>
+&lt;li>&lt;code>-lc&lt;/code> and &lt;code>-lcompiler_rt&lt;/code> are used to add &lt;code>libc&lt;/code> and &lt;code>compiler_rt&lt;/code> library to linker when resolving symbols.&lt;/li>
+&lt;li>&lt;code>--no-entry&lt;/code> is used to avoid &lt;code>entry symbol not defined _start&lt;/code> error.&lt;/li>
+&lt;/ul>
+&lt;p>If we look into the wasm file, we will find it has some Emscripten symbols inside.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">wasm2wat hello.wasm -o hello.wat
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>where &lt;code>wasm2wat&lt;/code> is a tool one of &lt;a href="https://github.com/WebAssembly/wabt">Wabt&lt;/a> toolkits, which is used for transforming a wasm binary file to a human readable text format file.&lt;/p>
+&lt;h2 id="compile-c-to-webassembly-with-emscripten">Compile C++ to WebAssembly with Emscripten&lt;/h2>
+&lt;p>In last chapter, we have compiled C++ programs to WebAssembly with clang toolchains. Actually, Emscripten helps organize the &lt;strong>driver process&lt;/strong> to generate WebAssembly files, with a python tool called &lt;code>emcc.py&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/emscripten/emcc.py -o hello.wasm hello.c -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>the parameter &lt;code>-o hello.wasm&lt;/code> is very important as it will not generate the JavaScript glue codes.&lt;/p>
+&lt;p>We record the commands in &lt;code>emcc&lt;/code>, as it shows the best practice for compiling WebAssembly with Emscripten toolchains. By following the python debugger, we find the &lt;code>emcc&lt;/code> tool split the whole process into three main phases: &lt;code>phase_compile_inputs&lt;/code>, &lt;code>phase_link&lt;/code>, &lt;code>phase_post_link&lt;/code>.&lt;/p>
+&lt;p>The compile command in &lt;code>emcc&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/path/to/emsdk/upstream/bin/clang
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -target wasm32-unknown-emscripten
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -DEMSCRIPTEN
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -D__EMSCRIPTEN_major__=3
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -D__EMSCRIPTEN_minor__=1
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -D__EMSCRIPTEN_tiny__=10
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -fignore-exceptions
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -fvisibility=default
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -combiner-global-alias-analysis=false
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -enable-emscripten-sjlj
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -disable-lsr
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -Werror=implicit-function-declaration
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -Xclang -iwithsysroot/include/SDL
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --sysroot=/path/to/emsdk/upstream/emscripten/cache/sysroot
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -Xclang -iwithsysroot/include/compat
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> hello.c -c -o hello.o
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The link command in &lt;code>emcc&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">/path/to/emsdk/upstream/bin/wasm-ld -o he.wasm hello.o
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -L/path/to/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> /path/to/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/crt1.o
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -lGL -lal -lhtml5 -lstandalonewasm -lstubs-debug -lc-debug -ldlmalloc -lcompiler_rt -lc++-noexcept -lc++abi-noexcept -lsockets
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -combiner-global-alias-analysis=false
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -enable-emscripten-sjlj
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -mllvm -disable-lsr
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --import-undefined
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --strip-debug
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export-if-defined=__start_em_asm
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export-if-defined=__stop_em_asm
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=emscripten_stack_get_end
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=emscripten_stack_get_free
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=emscripten_stack_get_base
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=emscripten_stack_init
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=stackSave
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=stackRestore
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=stackAlloc
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export=__errno_location
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --export-table
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> -z stack-size=5242880
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --initial-memory=16777216
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --max-memory=16777216
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> --global-base=1024
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Apparently, &lt;code>emcc&lt;/code> has done a lot of optimization work in the compiling and linking process.&lt;/p>
+&lt;h3 id="binaryen---the-post-link-phase">Binaryen - the post link phase&lt;/h3>
+&lt;p>Binaryen is another optimization tool integrated in Emscripten. It will extract the wasm binary file into a new AST (Abstract Syntax Tree), rather than the wasm plain stack format. Then this AST helps optimize the wasm file further in &lt;code>-O3&lt;/code> level.&lt;/p>
+&lt;p>Binaryen will not be launched unless &lt;code>-O3&lt;/code> parameter is passed to the &lt;code>emcc&lt;/code>.&lt;/p>
+&lt;h3 id="webassembly-api-with-emscripten">WebAssembly API with Emscripten&lt;/h3>
+&lt;p>The Emscripten documents have no update with the usage of WebAssembly API in JavaScript. Instead, it posts the solution with &lt;code>cwrap&lt;/code> and &lt;code>ccall&lt;/code> from &lt;code>Module&lt;/code>. Apparently, it is easier and more convenient to use the &lt;code>WebAssembly API&lt;/code>.&lt;/p>
+&lt;p>Let&amp;rsquo;s create a &lt;code>math.c&lt;/code> file.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-cpp" data-lang="cpp">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#include&lt;/span> &lt;span class="cpf">&amp;lt;stdlib.h&amp;gt;&lt;/span>&lt;span class="cp">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">extern&lt;/span> &lt;span class="kt">void&lt;/span> &lt;span class="nf">consoleLog&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">arg&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span>&lt;span class="o">*&lt;/span> &lt;span class="nf">alloc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">length&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">malloc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">4&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">length&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kt">int&lt;/span> &lt;span class="nf">factorial&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">arr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="n">length&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">length&lt;/span> &lt;span class="o">&amp;lt;=&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">length&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span> &lt;span class="k">else&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="n">length&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="kt">int&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="n">i&lt;/span> &lt;span class="o">&amp;lt;&lt;/span> &lt;span class="n">length&lt;/span>&lt;span class="p">;&lt;/span> &lt;span class="o">++&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">*&lt;/span> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">consoleLog&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">i&lt;/span>&lt;span class="p">]);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">arr&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">length&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="mi">1&lt;/span>&lt;span class="p">];&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>In &lt;code>math.c&lt;/code> we define an external function &lt;code>consoleLog&lt;/code> which is imported from JavaScript, an &lt;code>alloc&lt;/code> function used to do memory allocation and a &lt;code>factorial&lt;/code> function to test the operations. Then let&amp;rsquo;s build the wasm file.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/clang --target&lt;span class="o">=&lt;/span>wasm32 -c -o math.o -I /path/to/emsdk/upstream/emscripten/cache/sysroot/include math.c -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>And in the linking step, we make use of the full command from &lt;code>Emscripten&lt;/code>.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ /path/to/emsdk/upstream/bin/wasm-ld -o math.wasm math.o -L/path/to/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten /path/to/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/crt1_reactor.o -lGL -lal -lhtml5 -lstandalonewasm -lstubs-debug -lnoexit -lc-debug -ldlmalloc -lcompiler_rt -lc++-noexcept -lc++abi-noexcept -lsockets -mllvm -combiner-global-alias-analysis&lt;span class="o">=&lt;/span>&lt;span class="nb">false&lt;/span> -mllvm -enable-emscripten-sjlj -mllvm -disable-lsr --import-undefined --strip-debug --export-if-defined&lt;span class="o">=&lt;/span>factorial --export-if-defined&lt;span class="o">=&lt;/span>alloc --export-if-defined&lt;span class="o">=&lt;/span>__start_em_asm --export-if-defined&lt;span class="o">=&lt;/span>__stop_em_asm --export-if-defined&lt;span class="o">=&lt;/span>emscripten_stack_get_end --export-if-defined&lt;span class="o">=&lt;/span>emscripten_stack_get_free --export-if-defined&lt;span class="o">=&lt;/span>emscripten_stack_get_base --export-if-defined&lt;span class="o">=&lt;/span>emscripten_stack_init --export-if-defined&lt;span class="o">=&lt;/span>stackSave --export-if-defined&lt;span class="o">=&lt;/span>stackRestore --export-if-defined&lt;span class="o">=&lt;/span>stackAlloc --export-if-defined&lt;span class="o">=&lt;/span>__errno_location --export-table -z stack-size&lt;span class="o">=&lt;/span>&lt;span class="m">5242880&lt;/span> --initial-memory&lt;span class="o">=&lt;/span>&lt;span class="m">16777216&lt;/span> --entry&lt;span class="o">=&lt;/span>_initialize --max-memory&lt;span class="o">=&lt;/span>&lt;span class="m">16777216&lt;/span> --global-base&lt;span class="o">=&lt;/span>&lt;span class="m">1024&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Using the option &lt;code>--export-all&lt;/code> will make the linker import function &lt;code>wasi_snapshot_preview1&lt;/code>, which leads to errors in JavaScript. So do not use the option in production.&lt;/p>
+&lt;p>Instead, we can use the &lt;code>emcc&lt;/code> command directly to complete the whole building process.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">$ emcc math.c --no-entry -sEXPORTED_FUNCTIONS&lt;span class="o">=&lt;/span>_factorial,_alloc -sERROR_ON_UNDEFINED_SYMBOLS&lt;span class="o">=&lt;/span>&lt;span class="m">0&lt;/span> -o math-v2.wasm -O3 -v
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>&lt;code>-O3&lt;/code> will use &lt;code>wasm-opt&lt;/code> to optimize the wasm file, which is a tool from &lt;code>binaryen&lt;/code>&lt;/li>
+&lt;li>&lt;code>-sEXPORTED_FUNCTIONS=_factorial,_alloc&lt;/code> makes the &lt;code>wasm-ld&lt;/code> add &lt;code>--export-if-defined=factorial&lt;/code> and &lt;code>--export-if-defined=alloc&lt;/code>&lt;/li>
+&lt;li>&lt;code>-sERROR_ON_UNDEFINED_SYMBOLS=0&lt;/code> is used to avoid the &lt;code>node&lt;/code> &lt;code>compiler.js&lt;/code> processing bug in &lt;code>emcc&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;p>Then we add the following code in a file &lt;code>index.html&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&amp;lt;!DOCTYPE html&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">html&lt;/span> &lt;span class="na">lang&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;en&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">meta&lt;/span> &lt;span class="na">charset&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;UTF-8&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>Title&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">title&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">head&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fetch&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;math-v1.wasm&amp;#34;&lt;/span>&lt;span class="p">).&lt;/span>&lt;span class="nx">then&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">response&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="nx">response&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">arrayBuffer&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">then&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">bytes&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="nx">WebAssembly&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">instantiate&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">bytes&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">env&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">consoleLog&lt;/span>&lt;span class="o">:&lt;/span> &lt;span class="kd">function&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">arg&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">arg&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">.&lt;/span>&lt;span class="nx">then&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">target&lt;/span> &lt;span class="p">=&amp;gt;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">ptr&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">instance&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">exports&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">alloc&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">10&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">memory&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="k">new&lt;/span> &lt;span class="nx">Int32Array&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">instance&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">exports&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">memory&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">buffer&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">40&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">memory&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">2&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">memory&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="mi">3&lt;/span>&lt;span class="p">;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;ptr = %d&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">ptr&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kr">const&lt;/span> &lt;span class="nx">result&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nx">target&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">instance&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">exports&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">factorial&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">ptr&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">8&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">console&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">log&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;result: %d&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">result&lt;/span>&lt;span class="p">);&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">body&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">html&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Open the &lt;code>index.html&lt;/code> in chrome and we can get the output in the console.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">ptr = 5244424
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">6
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">18
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">108
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">1944
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">209952
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">408146688
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">result: 408146688
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>In this article, we reviewed how the &lt;code>emcc&lt;/code> script works and extracted the &lt;code>clang&lt;/code> commands. Then by using the WebAssembly API, we can easily integrate the packaged wasm file with the front-end JavaScript code. Thanks to the &lt;code>LLVM&lt;/code> and &lt;code>WebAssembly&lt;/code> text format, which helps a lot in the whole debugging process. And we post some suggestions on developing C/C++ with WebAssembly.&lt;/p>
+&lt;p>The &lt;code>emcc&lt;/code> is a helpful tool for compiling C++ to wasm, but it&amp;rsquo;s complicated to understand both &lt;code>emcc&lt;/code> and &lt;code>clang&lt;/code> options.
+It&amp;rsquo;s better to avoid to use Emscripten to generate JavaScript glue codes. Instead we can map all the interfaces in a Module with WebAssembly Module API.&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>Short for Java-Virtual-Machine&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2">
+&lt;p>Short for Garbage-Collection&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3">
+&lt;p>&lt;a href="https://dl.acm.org/doi/10.1145/3062341.3062363">https://dl.acm.org/doi/10.1145/3062341.3062363&lt;/a>&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4">
+&lt;p>Short for Ethereum-Virtual-Machine&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:5">
+&lt;p>Short for Low-Level-Virtual-Machine&amp;#160;&lt;a href="#fnref:5" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:6">
+&lt;p>Short for Intermediate-Representation&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item><item><title>ECS Architecture for GUI applications</title><link>https://blog.verygoodgraphics.com/posts/ecs/</link><pubDate>Wed, 14 Sep 2022 21:28:17 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/ecs/</guid><description>&lt;p>ECS, short for Entity-Component-System, is an architectural design pattern originally found in the video game programming. It is a powerful technique that allows easing the programming headaches as well as boosting the performance of a game containing huge amount of interactive objects.&lt;/p>
 &lt;p>That&amp;rsquo;s why the VGG engine takes ECS as the fundamental architecture, because VGG targets for high performance in the very beginning. However, VGG is more about making interactive applications, particularly the GUI applications. &lt;a name="initial-problem">&lt;/a>&lt;strong>Would the ECS architecture still be suitable for such a task?&lt;/strong> Let&amp;rsquo;s dive a little deeper.&lt;/p>
 &lt;h2 id="the-essence-of-ecs">The Essence of ECS&lt;/h2>
 &lt;p>Let&amp;rsquo;s first talk about ECS. There are already many descriptions of ECS around the internet so we just skip the rigorous but to give a one-sentence definition.&lt;/p>

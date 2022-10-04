@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WebAssembly on Very Good Graphics Blog</title><link>https://blog.verygoodgraphics.com/categories/webassembly/</link><description>Recent content in WebAssembly on Very Good Graphics Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>VeryGoodGraphics</copyright><lastBuildDate>Thu, 29 Sep 2022 15:36:14 +0800</lastBuildDate><atom:link href="https://blog.verygoodgraphics.com/categories/webassembly/index.xml" rel="self" type="application/rss+xml"/><item><title>Digging into Compiling C++ to WebAssembly</title><link>https://blog.verygoodgraphics.com/posts/cpp-wasm/</link><pubDate>Thu, 29 Sep 2022 15:36:14 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/cpp-wasm/</guid><description>&lt;p>The support of WebAssembly is a critical part of VGG engine, as we&lt;/p>
+&lt;ul>
+&lt;li>not only compile the whole engine to WebAssembly for running in browsers;&lt;/li>
+&lt;li>but also support user-generated wasm file in combination with designs to make a whole interactive app&lt;/li>
+&lt;/ul>
+&lt;p>By definition,&lt;/p>
+&lt;blockquote>
+&lt;p>WebAssembly is an executable binary format for a stack-based virtual machine.&lt;/p>
+&lt;/blockquote>
+&lt;p>and there have been so many blog posts, papers, and books help us disect the WebAssembly format. However, seldom articles talk about the compiling process of C++ programs to WebAssembly. Because there is a &lt;em>de-facto&lt;/em> tool called &lt;a href="https://emscripten.org/">Emscripten&lt;/a> which is devoted to this problem.&lt;/p>
+&lt;p>And nobody seems to have interest in the underlying mechanism of Emscripten.&lt;/p>
+&lt;p>In this article, we kept the record for digging into the compiling process from C++ to WebAssembly, thus demystifying Emscripten. Hope you enjoy it!&lt;/p></description></item></channel></rss>
