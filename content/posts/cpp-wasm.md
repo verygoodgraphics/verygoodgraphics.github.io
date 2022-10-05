@@ -20,12 +20,12 @@ reward: false
 mathjax: false
 ---
 
-WebAssembly (abbreviated Wasm) is an essential tool used by the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is built with C++, and then compiled into WebAssembly, so that we are able to run the VGG engine in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.
+The support for WebAssembly (abbreviated Wasm) is a critical part of the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is written in C++. It could be compiled into WebAssembly, so that we are able to run it in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.
 
 By definition,
 > WebAssembly is an executable binary format for a stack-based virtual machine.
 
-There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly. 
+There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly.
 
 In this post, we share the the process of using [Emscripten](https://emscripten.org/), a *de-facto* compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
 
