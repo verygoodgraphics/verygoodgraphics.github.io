@@ -481,15 +481,15 @@ It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue code
 &lt;p>Short for Intermediate-Representation&amp;#160;&lt;a href="#fnref:6" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
 &lt;/li>
 &lt;/ol>
-&lt;/div></description></item><item><title>ECS Architecture for GUI applications</title><link>https://blog.verygoodgraphics.com/posts/ecs/</link><pubDate>Wed, 14 Sep 2022 21:28:17 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/ecs/</guid><description>&lt;p>ECS, short for Entity-Component-System, is an architectural design pattern originally found in the video game programming. It is a powerful technique that allows easing the programming headaches as well as boosting the performance of a game containing huge amount of interactive objects.&lt;/p>
-&lt;p>That&amp;rsquo;s why the VGG engine takes ECS as the fundamental architecture, because VGG targets for high performance in the very beginning. However, VGG is more about making interactive applications, particularly the GUI applications. &lt;a name="initial-problem">&lt;/a>&lt;strong>Would the ECS architecture still be suitable for such a task?&lt;/strong> Let&amp;rsquo;s dive a little deeper.&lt;/p>
+&lt;/div></description></item><item><title>ECS Architecture for GUI applications</title><link>https://blog.verygoodgraphics.com/posts/ecs/</link><pubDate>Wed, 14 Sep 2022 21:28:17 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/ecs/</guid><description>&lt;p>ECS, short for Entity-Component-System, is an architectural design pattern originally found in video game programming. It is a powerful technique that eases programming headaches as well as boosts the performance of a game containing a huge amount of interactive objects.&lt;/p>
+&lt;p>That&amp;rsquo;s why the VGG engine takes ECS as the fundamental architecture because VGG targets high performance in the very beginning. However, VGG is more about making interactive applications, particularly GUI applications. &lt;a name="initial-problem">&lt;/a>&lt;strong>Would the ECS architecture still be suitable for such a task?&lt;/strong> Let&amp;rsquo;s dive a little deeper.&lt;/p>
 &lt;h2 id="the-essence-of-ecs">The Essence of ECS&lt;/h2>
-&lt;p>Let&amp;rsquo;s first talk about ECS. There are already many descriptions of ECS around the internet so we just skip the rigorous but to give a one-sentence definition.&lt;/p>
+&lt;p>Let&amp;rsquo;s first talk about ECS. There are already many descriptions of ECS around the internet so we just skip the rigorous but give a one-sentence definition.&lt;/p>
 &lt;blockquote>
-&lt;p>ECS is about entities&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> &lt;em>composed&lt;/em> of difference types of component whose data are manipulated by one or more systems.&lt;/p>
+&lt;p>ECS is about entities&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> &lt;em>composed&lt;/em> of different types of component whose data are manipulated by one or more systems.&lt;/p>
 &lt;/blockquote>
 &lt;p>And the essence of ECS is &lt;em>composition&lt;/em>, with obvious advantages over the &lt;em>inheritance&lt;/em> in Object-Oriented-Programming.&lt;/p>
-&lt;p>In OOP, inheritance is one of three principles, the other two being &lt;em>encapulation&lt;/em> and &lt;em>polymorphism&lt;/em>. Inheritance is regarded as a technique for reusing data and functions, for example, as mountain bike is a kind of bike, the &lt;code>MountainBike&lt;/code> class shall inherit all the data of the &lt;code>Bike&lt;/code> class as follows&lt;/p>
+&lt;p>In OOP, inheritance is one of three principles, the other two being &lt;em>encapsulation&lt;/em> and &lt;em>polymorphism&lt;/em>. Inheritance is regarded as a technique for reusing data and functions, for example, as mountain bike is a kind of bike, the &lt;code>MountainBike&lt;/code> class shall inherit all the data of the &lt;code>Bike&lt;/code> class as follows&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -524,12 +524,12 @@ It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue code
 &lt;p>However, this leads to many headaches, just to name a few&lt;/p>
 &lt;ul>
 &lt;li>&lt;strong>Overhead of virtual functions&lt;/strong>: extra runtime cost of virtual table and virtual pointers, let alone some unexpected overriding pitfalls&lt;/li>
-&lt;li>&lt;strong>Diamond problem in multiple inheritance&lt;/strong>: ambiguous overridden data and functions from multiple ancestors&lt;/li>
+&lt;li>&lt;strong>The diamond problem in multiple inheritances&lt;/strong>: ambiguous overridden data and functions from multiple ancestors&lt;/li>
 &lt;li>&lt;strong>Dynamic type castings&lt;/strong>: performance bottleneck of &lt;code>dynamic_cast&lt;/code> for casting base pointer to derived pointer&lt;/li>
-&lt;li>&lt;strong>Complex inheritance chains&lt;/strong>: in order to model for real-world problems, complex inheritance relationships has to be designed which would look daunting for new commers&lt;/li>
+&lt;li>&lt;strong>Complex inheritance chains&lt;/strong>: in order to model for real-world problems, complex inheritance relationships has to be designed which would look daunting for newcomers&lt;/li>
 &lt;/ul>
 &lt;p>And the developer needs to know the &lt;a href="https://www.oreilly.com/library/view/inside-the-c/0201834545/">Object-Model&lt;/a> well to write memory-safe and performant C++ code, and sometimes he needs to resort to exotic programming idoms such as CRTP&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup> or SFINAE&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup> for even better performance.&lt;/p>
-&lt;p>The complexity disappears when we use composition with ECS architecture. If we want to create a new class for &lt;code>MountainBike&lt;/code>, we needn&amp;rsquo;t to inherit from &lt;code>Bike&lt;/code>, but only needs to describe the unique data fileds a mountain bike will have. When we need an entity for a mountain bike, we could push both instances of &lt;code>BikeComponent&lt;/code> and &lt;code>MountainBikeComponent&lt;/code> into the entity, which are renamed from &lt;code>Bike&lt;/code> and &lt;code>MountainBike&lt;/code> respectively without inheritance relationship.&lt;/p>
+&lt;p>The complexity disappears when we use composition with ECS architecture. If we want to create a new class for &lt;code>MountainBike&lt;/code>, we needn&amp;rsquo;t inherit from &lt;code>Bike&lt;/code>, but only need to describe the unique data fields a mountain bike will have. When we need an entity for a mountain bike, we could push both instances of &lt;code>BikeComponent&lt;/code> and &lt;code>MountainBikeComponent&lt;/code> into the entity, which are renamed from &lt;code>Bike&lt;/code> and &lt;code>MountainBike&lt;/code> respectively without an inheritance relationship.&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -562,19 +562,19 @@ It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue code
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">});&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>And even more components can be pushed into an entity, each of them describes a specific feature that could be freely added to or removed from an entity. As long as proper memory layout is configured for those components for the sake of cache miss ratio reduction, the performance can be quite good.&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>&lt;/p>
+&lt;/div>&lt;p>And even more components can be pushed into an entity, each of them describing a specific feature that could be freely added to or removed from an entity. As long as proper memory layout is configured for those components for the sake of cache miss ratio reduction, the performance can be quite good.&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>&lt;/p>
 &lt;p>As to systems, which can be as simple as a function, would manipulate those data accordingly. It is exactly what Niklaus Wirth proposed,&lt;/p>
 &lt;blockquote>
 &lt;p>Programs = Data Structures + Algorithm&lt;/p>
 &lt;/blockquote>
-&lt;p>where components represents data structures and systems represents algorithm. The programming suddenly becomes easier and clearer since there are no more traps hiding bebind various advanced concepts, to be more specific, no more extra runtime cost due to how the compiler implements inheritance, and no more ambiguity issue due to multiple inheritance.&lt;/p>
-&lt;p>As a matter of fact, ECS is a bit like &lt;a href="https://en.wikipedia.org/wiki/Trait_(computer_programming)">Trait&lt;/a>, since trait contains a set of functions, and both of them emphasize the concept of composition. However, a trait class cannot have member data, whereas a component could be more than a POD&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> type. All in all, ECS is an architectural design pattern, having no hard-constraints on programming, so&lt;/p>
+&lt;p>where components represent data structures and systems represents algorithm. The programming suddenly becomes easier and clearer since no more traps are hiding behind various advanced concepts, to be more specific, no more extra runtime cost due to how the compiler implements inheritance, and no more ambiguity issues due to multiple inheritances.&lt;/p>
+&lt;p>As a matter of fact, ECS is a bit like &lt;a href="https://en.wikipedia.org/wiki/Trait_(computer_programming)">Trait&lt;/a>, since a trait contains a set of functions, and both of them emphasize the concept of composition. However, a trait class cannot have member data, whereas a component could be more than a POD&lt;sup id="fnref:5">&lt;a href="#fn:5" class="footnote-ref" role="doc-noteref">5&lt;/a>&lt;/sup> type. All in all, ECS is an architectural design pattern, having no hard constraints on programming, so&lt;/p>
 &lt;ul>
 &lt;li>A component type is free to have inheritance relationships with another component type;&lt;/li>
 &lt;li>A component type is also free to have both data and member functions&lt;sup id="fnref:6">&lt;a href="#fn:6" class="footnote-ref" role="doc-noteref">6&lt;/a>&lt;/sup>.&lt;/li>
 &lt;/ul>
 &lt;h2 id="the-essence-of-gui">The Essence of GUI&lt;/h2>
-&lt;p>We already have a rough impression of ECS, and now it&amp;rsquo;s time for discussing GUI. But let&amp;rsquo;s start from a game. A game may consist of many entities, including rivers, mountains, players, NPCs, monsters, etc. These entities usually have no relationships, or more specifically, no hierarchical relationships. In contrast, a GUI is essentially a tree of entities, where hierarchy must be imposed.&lt;/p>
+&lt;p>We already have a rough impression of ECS, and now it&amp;rsquo;s time for discussing GUI. But let&amp;rsquo;s start with a game. A game may consist of many entities, including rivers, mountains, players, NPCs, monsters, etc. These entities usually have no relationships, or more specifically, no hierarchical relationships. In contrast, a GUI is essentially a tree of entities, where hierarchy must be imposed.&lt;/p>
 &lt;link rel="stylesheet" href="https://blog.verygoodgraphics.com/css/hugo-easy-gallery.css" />
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
@@ -586,7 +586,7 @@ style="max-width:50%" >
 &lt;a href="https://blog.verygoodgraphics.com/images/simple-dialog.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
-&lt;p>As you can see, the simple dialog above can be divided into three parts: title, content and the button group. The button group contains another two buttons. So the tree looks like this&lt;/p>
+&lt;p>As you can see, the simple dialog above can be divided into three parts: title, content, and the button group. The button group contains another two buttons. So the tree looks like this&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
@@ -605,9 +605,9 @@ style="max-width:50%" >
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> └── OK Button
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>where the title and content are instances of text widget&lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup>, button group is of layout widget, and buttons are of button widget. If we see each widget an entity, these widgets comprise a hierarchical entity tree.&lt;/p>
+&lt;/div>&lt;p>where the title and content are instances of text widget&lt;sup id="fnref:7">&lt;a href="#fn:7" class="footnote-ref" role="doc-noteref">7&lt;/a>&lt;/sup>, button group is of layout widget, and buttons are of the button widget. If we see each widget as an entity, these widgets comprise a hierarchical entity tree.&lt;/p>
 &lt;p>So the &lt;a href="#initial-problem">initial problem&lt;/a> becomes, would the ECS architecture be suitable for modeling such a hierarchical system?&lt;/p>
-&lt;p>And from another aspect of view, would it be an overkill to use ECS architecture for GUI applications? Since ECS architecture could process up to millions of entities, do we really need to process such a magnitude of entities in even most complex GUI like the following example?&lt;/p>
+&lt;p>And from another aspect of view, would it be an overkill to use ECS architecture for GUI applications? Since ECS architecture could process up to millions of entities, do we really need to process such a magnitude of entities in even the most complex GUI like the following example?&lt;/p>
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
 itemscope itemtype="http://schema.org/ImageObject"
@@ -620,10 +620,10 @@ style="max-width:100%" >
 &lt;/div>
 &lt;p>We&amp;rsquo;ll figure out the answers in the next chapter.&lt;/p>
 &lt;h2 id="ecs-for-gui">ECS for GUI&lt;/h2>
-&lt;p>As we have mentioned in the first chapter, the data are defined by the components and the systems will update the data constantly during the whole execution lifetime. This leds to an interesting question, how does the system find the appropriate data? The answer is through, in our definition, queries.&lt;/p>
-&lt;p>Different ECS libraries have huge discrepancy with respect to the implementation details, like how the components are organized in memory and so as with the query implementation. But this won&amp;rsquo;t stop up dividing the queries into two different semantic types, horizontal query and vertical query.&lt;/p>
+&lt;p>As we have mentioned in the first chapter, the data are defined by the components and the systems will update the data constantly during the whole execution lifetime. This led to an interesting question, how does the system find the appropriate data? The answer is through, in our definition, queries.&lt;/p>
+&lt;p>Different ECS libraries have a huge discrepancy concerning the implementation details, like how the components are organized in memory and so as with the query implementation. But this won&amp;rsquo;t stop us from dividing the queries into two different semantic types, horizontal query, and vertical query.&lt;/p>
 &lt;h3 id="horizontal-query">Horizontal Query&lt;/h3>
-&lt;p>Let&amp;rsquo;s have a look at the adapted code snippets from the moust famous C++ ECS framework &lt;a href="https://github.com/skypjack/entt">&lt;code>EnTT&lt;/code>&lt;/a>&lt;/p>
+&lt;p>Let&amp;rsquo;s have a look at the adapted code snippets from the most famous C++ ECS framework &lt;a href="https://github.com/skypjack/entt">&lt;code>EnTT&lt;/code>&lt;/a>&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
@@ -664,7 +664,7 @@ style="max-width:100%" >
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>In the above code, the &lt;code>update&lt;/code> is a simple system, which developer could utilize to update the entity position based on its current velocity. The system at first queries all entities that have both component of &lt;code>position&lt;/code> and &lt;code>velocity&lt;/code>, save the result in a view, and then iterate over each entity for the updating.&lt;/p>
+&lt;/div>&lt;p>In the above code, the &lt;code>update&lt;/code> is a simple system, which the developer could utilize to update the entity position based on its current velocity. The system at first queries all entities that have both components of &lt;code>position&lt;/code> and &lt;code>velocity&lt;/code>, saves the result in a view, and then iterates over each entity for updating.&lt;/p>
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
 itemscope itemtype="http://schema.org/ImageObject"
@@ -675,7 +675,7 @@ style="max-width:100%" >
 &lt;a href="https://blog.verygoodgraphics.com/images/ecs-query.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
-&lt;p>If we visualize this process, we will find out that the query is &lt;strong>horizontal&lt;/strong>. It doesn&amp;rsquo;t matter whether there is a hierachy or not because of possibly flattened storage and indirection of the relationship.&lt;/p>
+&lt;p>If we visualize this process, we will find out that the query is &lt;strong>horizontal&lt;/strong>. It doesn&amp;rsquo;t matter whether there is a hierarchy or not because of possibly flattened storage and indirection of the relationship.&lt;/p>
 &lt;p>Horizontal queries are common in video game programming, but also exist in GUI applications. Let&amp;rsquo;s have a look at the following example.&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
@@ -703,15 +703,15 @@ style="max-width:100%" >
 &lt;p>Say, if we want to mimic the CSS selector behavior during GUI programming, we can just take advantage of the horizontal query ability of ECS, which means ECS at least suits this particular use case.&lt;/p>
 &lt;h3 id="vertical-query">Vertical Query&lt;/h3>
 &lt;p>Compared to horizontal query, vertical query focus on querying &lt;em>entities&lt;/em>, rather than &lt;em>components&lt;/em>. So vertical query cares about a specific &lt;em>named&lt;/em> entity, looking into the internals and finding all the components of it.&lt;/p>
-&lt;p>Let&amp;rsquo;s still take the dialog example for discussion. In order to start iterating through the entity tree, we need to find the root entity, namely the &lt;code>dialog entity&lt;/code> in this example. After that, we search for what components this entity has, or which children it holds, then possibly recurring into each of children for further investigations.&lt;/p>
+&lt;p>Let&amp;rsquo;s still take the dialog example for discussion. In order to start iterating through the entity tree, we need to find the root entity, namely the &lt;code>dialog entity&lt;/code> in this example. After that, we search for what components this entity has, or which children it holds, then possibly recurring into each of the children for further investigations.&lt;/p>
 &lt;p>Here comes an interesting question. How do we model the hierarchy relationship between entities?&lt;/p>
 &lt;p>There are mainly two methods,&lt;/p>
 &lt;ul>
 &lt;li>We could hardcode the relationship into the entity data structure; or&lt;/li>
-&lt;li>We could implement a relationship component which is hot-pluggable into an entity.&lt;/li>
+&lt;li>We could implement a relationship component that is hot-pluggable into an entity.&lt;/li>
 &lt;/ul>
-&lt;p>Each of the two methods works, but most mature ECS libraries, including &lt;a href="https://skypjack.github.io/2019-06-25-ecs-baf-part-4/">EnTT&lt;/a> and &lt;a href="https://ajmmertens.medium.com/building-games-in-ecs-with-entity-relationships-657275ba2c6c">flecs&lt;/a>, prefer the latter, so does VGG engine.&lt;/p>
-&lt;p>The most important advantage is the dynamic ability to add or remove a relationship, compared to the hardcoded method. Because sometimes we need more than one tree hierarchy during the whole lifetime. Take chromium engine for &lt;a href="https://developer.chrome.com/articles/renderingng-architecture/#architecture-components">instance&lt;/a>, during the rasterization pipeline, we need at least three trees, including DOM tree, layout tree and the property tree, which could be peeked in the following figure from their offical blog.&lt;/p>
+&lt;p>Each of the two methods works, but most mature ECS libraries, including &lt;a href="https://skypjack.github.io/2019-06-25-ecs-baf-part-4/">EnTT&lt;/a> and &lt;a href="https://ajmmertens.medium.com/building-games-in-ecs-with-entity-relationships-657275ba2c6c">flecs&lt;/a>, prefer the latter, and so does the VGG engine.&lt;/p>
+&lt;p>The most important advantage is the dynamic ability to add or remove a relationship, compared to the hardcoded method. Because sometimes we need more than one tree hierarchy during the whole lifetime. Take the chromium engine for &lt;a href="https://developer.chrome.com/articles/renderingng-architecture/#architecture-components">instance&lt;/a>, during the rasterization pipeline, we need at least three trees, including the DOM tree, layout tree, and property tree, which could be peeked in the following figure from their official blog.&lt;/p>
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
 itemscope itemtype="http://schema.org/ImageObject"
@@ -722,11 +722,11 @@ style="max-width:80%" >
 &lt;a href="https://blog.verygoodgraphics.com/images/chrome-pipeline.avif" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
-&lt;p>A single node entity could be reused across multiple trees, as long as multiple relationship component is added into the entity, which is exactly what ECS excels at.&lt;/p>
+&lt;p>A single node entity could be reused across multiple trees, as long as multiple relationship component is added to the entity, which is exactly what ECS excels at.&lt;/p>
 &lt;h3 id="event-mechanism">Event Mechanism&lt;/h3>
 &lt;p>In &lt;em>interactive&lt;/em> GUI applications, how the architecture handles interactions is quite important, which is what we call the event mechanism. The &lt;em>signal&lt;/em> concept, taken equally as the &lt;em>event&lt;/em> concept, would be just called event in our context.&lt;/p>
-&lt;p>Strictly speaking, the event mechanism should not be part of ECS architecture, but as it plays an important role in interactive apps and games so good support of it is common in ECS frameworks. For example, the EnTT library proposed &lt;a href="https://skypjack.github.io/entt/md_docs_md_signal.html">four distinct concepts&lt;/a> for the entire event mechanism, namely the delegate, the signal, the dispatcher and the emitter.&lt;/p>
-&lt;p>We won&amp;rsquo;t bother those abstract concepts but just describe what we expected in such a framework&lt;/p>
+&lt;p>Strictly speaking, the event mechanism should not be part of ECS architecture, but as it plays an important role in interactive apps and games so good support of it is common in ECS frameworks. For example, the EnTT library proposed &lt;a href="https://skypjack.github.io/entt/md_docs_md_signal.html">four distinct concepts&lt;/a> for the entire event mechanism, namely the delegate, the signal, the dispatcher, and the emitter.&lt;/p>
+&lt;p>We won&amp;rsquo;t bother with those abstract concepts but just describe what we expected in such a framework&lt;/p>
 &lt;ul>
 &lt;li>The ability to define various types of events, including
 &lt;ul>
@@ -737,33 +737,33 @@ style="max-width:80%" >
 &lt;li>The ability to send events to multiple entities, like broadcasting or multicasting messages in a network, and possibly across different threads or processes.&lt;/li>
 &lt;li>The ability to respond to those events, using pre-registered callbacks for each type of event, which itself could be dynamically added or removed
 &lt;ul>
-&lt;li>The responding process, a.k.a. invoking callbacks, should be asynchronous, which means it won&amp;rsquo;t make GUI unresponsible. Note this is orthgonal to multi-threading since even single thread is capable of parellel computing using technique like coroutine.&lt;/li>
+&lt;li>The responding process, a.k.a. invoking callbacks, should be asynchronous, which means it won&amp;rsquo;t make GUI unresponsible. Note this is orthogonal to multi-threading since even a single thread is capable of parallel computing using techniques like coroutine.&lt;/li>
 &lt;/ul>
 &lt;/li>
-&lt;li>The ability to queue, delay, filter, even compose events for more complicated behaviors&lt;/li>
+&lt;li>The ability to queue, delay, filter, and even compose events for more complicated behaviors&lt;/li>
 &lt;/ul>
 &lt;p>More descriptions are welcome but the above abilities should be sufficient for a simple GUI framework.&lt;/p>
-&lt;p>Let&amp;rsquo;s look into a famous non-ECS GUI framework, Qt. Qt uses a &lt;a href="https://doc.qt.io/qt-6/signalsandslots.html">signal-slot mechanism&lt;/a> as its core event machanism, which could be summarized as follows&lt;/p>
+&lt;p>Let&amp;rsquo;s look into a famous non-ECS GUI framework, Qt. Qt uses a &lt;a href="https://doc.qt.io/qt-6/signalsandslots.html">signal-slot mechanism&lt;/a> as its core event mechanism, which could be summarized as follows&lt;/p>
 &lt;ul>
-&lt;li>All object should be inherited from &lt;code>QObject&lt;/code> in order to use signal-slot mechanism&lt;/li>
+&lt;li>Any object should be inherited from &lt;code>QObject&lt;/code> in order to use the signal-slot mechanism&lt;/li>
 &lt;li>A meta-compiler is needed to transform signal-slot related code into normal C++ code&lt;/li>
-&lt;li>Signal and slot is of many-to-many relationship, which are connected by &lt;code>connect&lt;/code> function. The executing of slot function could happen in another thread depending on &lt;a href="https://doc.qt.io/qt-6/qt.html#ConnectionType-enum">connection type&lt;/a>&lt;/li>
+&lt;li>Signal and slot are of a many-to-many relationship, which is connected by &lt;code>connect&lt;/code> function. The execution of the slot function could happen in another thread depending on &lt;a href="https://doc.qt.io/qt-6/qt.html#ConnectionType-enum">connection type&lt;/a>&lt;/li>
 &lt;li>The exchanged data are defined by the arguments of signal and slot functions, which are type-checked by the meta-object system&lt;/li>
 &lt;/ul>
-&lt;p>We can find out that except for advanced ability like event composing, Qt&amp;rsquo;s signal-slot mechanism loosely conforms to our expectations.&lt;/p>
-&lt;p>As to ECS-based GUI framework, we could claim that those expectations should be satisfied more easily due to its flexibility, for example, we do not need a meta-compiler and singular inheritance. The data could be exchanged with a POD-style component across entities as well. We will leave it to implementation details or possibly another blog post in the future.&lt;/p>
+&lt;p>We can find out that except for advanced abilities like event composing, Qt&amp;rsquo;s signal-slot mechanism loosely conforms to our expectations.&lt;/p>
+&lt;p>As to the ECS-based GUI framework, we could claim that those expectations should be satisfied more easily due to its flexibility, for example, we do not need a meta-compiler and singular inheritance. The data could be exchanged with a POD-style component across entities as well. We will leave it to implementation details or possibly another blog post in the future.&lt;/p>
 &lt;h3 id="summary-of-ecs-for-gui">Summary of ECS for GUI&lt;/h3>
-&lt;p>We have already discussed several use cases and come to an conclusion that ECS could be even a better solution than traditional OOP-based solution for the GUI programming problems.&lt;/p>
+&lt;p>We have already discussed several use cases and concluded that ECS could be an even better solution than traditional OOP-based solutions for GUI programming.&lt;/p>
 &lt;p>And also please remember, VGG is utilizing designs as the base of a GUI. A common design would have up to 10-40k layers, even 250k layers.&lt;sup id="fnref:8">&lt;a href="#fn:8" class="footnote-ref" role="doc-noteref">8&lt;/a>&lt;/sup> This places a huge performance challenge so we think ECS is just right here to rescue.&lt;/p>
 &lt;h2 id="conclusion">Conclusion&lt;/h2>
-&lt;p>In this article, we have discussed the essence of ECS architecture and GUI, and elaborated several use cases of ECS in GUI programming. This is a very big and deep topic so it is impossible to cover everything in a single post, for instance, we haven&amp;rsquo;t mentioned concrete implementation details of such an ECS architecture specialized for GUI programming.&lt;/p>
+&lt;p>In this article, we have discussed the essence of ECS architecture and GUI, and elaborated on several use cases of ECS in GUI programming. This is a very big and deep topic so it is impossible to cover everything in a single post, for instance, we haven&amp;rsquo;t mentioned concrete implementation details of such an ECS architecture specialized for GUI programming.&lt;/p>
 &lt;p>There are many good ECS implementations around the internet, for example&lt;/p>
 &lt;ul>
 &lt;li>&lt;a href="https://github.com/skypjack/entt">EnTT&lt;/a> is implemented with a custom &lt;a href="https://github.com/skypjack/entt/blob/master/src/entt/entity/sparse_set.hpp">sparse-set&lt;/a> data structure.&lt;/li>
-&lt;li>&lt;a href="https://github.com/SanderMertens/flecs">flecs&lt;/a> is implemented with a traditional &lt;a href="https://ajmmertens.medium.com/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9">archtype&lt;/a> method, where the addition and deletion of component could be a theoretical performance bottleneck in common scenarios.&lt;/li>
-&lt;li>&lt;a href="https://github.com/amzeratul/halley">halley&lt;/a> engine, which is a game engine successfully shipped a game called &lt;a href="https://store.steampowered.com/app/607050/_/">Wargroove&lt;/a>, implements a &lt;a href="https://github.com/amzeratul/halley/tree/develop/src/engine/entity/include/halley/entity">custom&lt;/a> ECS architecture&lt;/li>
+&lt;li>&lt;a href="https://github.com/SanderMertens/flecs">flecs&lt;/a> is implemented with a traditional &lt;a href="https://ajmmertens.medium.com/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9">archtype&lt;/a> method, where the addition and deletion of a component could be a theoretical performance bottleneck in common scenarios.&lt;/li>
+&lt;li>&lt;a href="https://github.com/amzeratul/halley">halley&lt;/a> engine, which is a game engine that successfully shipped a game called &lt;a href="https://store.steampowered.com/app/607050/_/">Wargroove&lt;/a>, implements a &lt;a href="https://github.com/amzeratul/halley/tree/develop/src/engine/entity/include/halley/entity">custom&lt;/a> ECS architecture&lt;/li>
 &lt;/ul>
-&lt;p>VGG engine does not use a baked ECS framework like EnTT or flecs but to choose to implement one on our own, just like what halley has done. This is because we believe a tailered version better suits for our use cases, particularly for programming GUI applications. Currently VGG implements a simple ECS architecture which still lacks some features, but the inner iteration is happening. If you like the concept of &lt;a href="https://blog.verygoodgraphics.com/posts/intro-vgg/">Design-as-Code&lt;/a> as well as the ECS architecture, you can keep an eye on our &lt;a href="https://github.com/verygoodgraphics/vgg_runtime">open-sourced&lt;/a> version.&lt;/p>
+&lt;p>VGG engine does not use a baked ECS framework like EnTT or flecs but chooses to implement one on our own, just like what halley has done. This is because we believe a tailored version better suits our use cases, particularly for programming GUI applications. Currently, VGG implements a simple ECS architecture that still lacks some features, but the inner iteration is happening. If you like the concept of &lt;a href="https://blog.verygoodgraphics.com/posts/intro-vgg/">Design-as-Code&lt;/a> as well as the ECS architecture, you can keep an eye on our &lt;a href="https://github.com/verygoodgraphics/vgg_runtime">open-sourced&lt;/a> version.&lt;/p>
 &lt;div class="footnotes" role="doc-endnotes">
 &lt;hr>
 &lt;ol>
