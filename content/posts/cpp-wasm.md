@@ -27,23 +27,23 @@ By definition,
 
 There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly.
 
-In this post, we share the the process of using [Emscripten](https://emscripten.org/), a *de-facto* compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
+In this post, we share the process of using [Emscripten](https://emscripten.org/), a *de-facto* compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
 
 <!--more-->
 
 ## Background of WebAssembly
 
-Let's start the story from JVM[^jvm], the most famous virtual machine in programming history. JVM-based languages is a collection of languages which obey the JVM specification, including Java, Clojure, Scala and Kotlin, so that they can run on JVM without cross-platform issues, while getting the power of JVM including GC[^gc], exception handling, multithreading, atomic operands, etc.
+Let's start the story with JVM[^jvm], the most famous virtual machine in programming history. JVM-based languages are a collection of languages that obey the JVM specification, including Java, Clojure, Scala, and Kotlin, so that they can run on JVM without cross-platform issues, while getting the power of JVM including GC[^gc], exception handling, multithreading, atomic operands, etc.
 
-WebAssembly format actually borrows a lot from the JVM specification. Some details can be peeked in the paper *Bringing the Web up to Speed with WebAssembly*[^wasm-paper]. The authors also implemented a virtual machine to execute the WebAssembly format. As long as a programming language could be compiled to WebAssembly, it can be executed in this WebAssembly virtual machine. This is exactly what JVM does.
+WebAssembly format actually borrows a lot from the JVM specification. Some details can be peeked in the paper *Bringing the Web up to Speed with WebAssembly*[^wasm-paper]. The authors also implemented a virtual machine to execute the WebAssembly format. As long as a programming language could be compiled into WebAssembly, it can be executed in this WebAssembly virtual machine. This is exactly what JVM does.
 
 [^jvm]: Short for Java-Virtual-Machine
 [^gc]: Short for Garbage-Collection
 [^wasm-paper]: https://dl.acm.org/doi/10.1145/3062341.3062363
 
-WebAssembly is designed for speeding up the Web. For example, we can use Photoshop in the browser. The ability of WebAssembly is greatly extended. It could help build portable standards for embedded devices, so that we can narrow the gap between embedded hardware and software. As a consequence, more devlopers using high-level programming language are able to deploy their products on tiny embedded hardware. It is the last puzzle of making everything intelligentization.
+WebAssembly is designed for speeding up the Web. For example, we can use Photoshop in the browser. The ability of WebAssembly is greatly extended. It could help build portable standards for embedded devices so that we can narrow the gap between embedded hardware and software. As a consequence, more developers using high-level programming languages are able to deploy their products on tiny embedded hardware. It is the last puzzle of making everything intelligent.
 
-Besides, the blockchain community is paying more attention to WebAssembly. For example, Ethereum executes contracts in its own virtual machine called EVM[^evm]. These contracts are written by Solidity language, a derivative programming language from Go. Developers cannot port the contracts to other chain unless it also supports EVM. What will happen if we use WebAssembly as the virtual machine format? Developers can write contracts in any programming language, then compile them to WebAssembly format. The contract is portable to any chains which support WebAssembly virtual machine. And it is the next virtual machine generation for most newer blockchain projects. We believe it will be the future for DeFi infrastructure.
+Besides, the blockchain community is paying more attention to WebAssembly. For example, Ethereum executes contracts in its own virtual machine called EVM[^evm]. These contracts are written by Solidity language, a derivative programming language from Go. Developers cannot port the contracts to another chain unless it also supports EVM. What will happen if we use WebAssembly as the virtual machine format? Developers can write contracts in any programming language, then compile them to WebAssembly format. The contract is portable to any chains which support WebAssembly virtual machine. And it is the next virtual machine generation for most newer blockchain projects. We believe it will be the future for DeFi infrastructure.
 
 [^evm]: Short for Ethereum-Virtual-Machine
 
@@ -52,17 +52,17 @@ Rust and C++, the two programming languages, are the primarily supported languag
 [^llvm]: Short for Low-Level-Virtual-Machine
 [^ir]: Short for Intermediate-Representation
 
-To use the WebAssembly technology, we need to generate a wasm file and then execute it in the target environment. Generating a wasm file includes two steps, compiling and linking, which is the same as the C++ building process. Then the wasm file can be adapted with JavaScript and run in a browser, or just run in standalone runtime as an normal native process.
+To use the WebAssembly technology, we need to generate a wasm file and then execute it in the target environment. Generating a wasm file includes two steps, compiling and linking, which is the same as the C++ building process. Then the wasm file can be adapted with JavaScript and run in a browser, or just run in standalone runtime as a normal native process.
 
 ## Preparation
 
-It's very convenient to set up a C++ WebAssembly building environment with `emsdk`, which help us collect all the toolkits for compiling WebAssembly.
+It's very convenient to set up a C++ WebAssembly building environment with `emsdk`, which helps us collect all the toolkits for compiling WebAssembly.
 
 ```bash
 $ git clone https://github.com/emscripten-core/emsdk.git
 ```
 
-After downloading `emsdk`, we will get all the tools under directory `upstream`. We can check the installation by the command:
+After downloading `emsdk`, we will get all the tools under the directory `upstream`. We can check the installation by the command:
 
 ```bash
 $ /path/to/emsdk/upstream/bin/clang -v
@@ -74,7 +74,7 @@ Please note, `upstream/cache/sysroot` is a very important directory. It contains
 
 ## Compile C++ to WebAssembly with Clang
 
-It is not easy to be a master at compiling C++ programs because the compiler has thousands of options to control the compiling and linking process. As a curious developer, we can debug the LLVM and clang source code to understand how it works. Let's start from the famous `hello world` program.
+It is not easy to be a master at compiling C++ programs because the compiler has thousands of options to control the compiling and linking process. As a curious developer, we can debug the LLVM and clang source code to understand how it works. Let's start with the famous `hello world` program.
 
 ```cpp
 #include <stdio.h>
@@ -87,7 +87,7 @@ int main() {
 
 Here we include the header file of `stdio.h`, which is contained in the C language library `libc`. Emscripten uses `musl` library and `libc` library customized for `wasi` environment, and copys the `libcxx`, `libcxxabi`, `libunwind` from LLVM, which are used to support the C++ language features.
 
-To show how to compile the program, we splits the progress into four stages: preprocessing, generating LLVM IR, generating assembly target object file, and linking.
+To show how to compile the program, we split the progress into four stages: preprocessing, generating LLVM IR, generating assembly target object file, and linking.
 
 ### Preprocessing
 
@@ -106,7 +106,7 @@ hello.c:1:10: fatal error: 'stdio.h' file not found
 #include <stdio.h>
 ```
 
-It is about the missing header file `stdio.h`. C++ defines all function interfaces in header files. In the preprocessing step, the compiler will search the directories to find the header files. Here we are using the clang from `emsdk`. So it can not find the correct header file. And we notice that the current header search directories only includes:
+It is about the missing header file `stdio.h`. C++ defines all function interfaces in header files. In the preprocessing step, the compiler will search the directories to find the header files. Here we are using the clang from `emsdk`. So it can not find the correct header file. And we notice that the current header search directories only include:
 
 ```
 ignoring nonexistent directory "/include"
@@ -115,7 +115,7 @@ ignoring nonexistent directory "/include"
  /path/to/emsdk/upstream/lib/clang/15.0.0/include
  ```
 
- Then we can add `-I` to append header search directory to resolve the problem. As usual we can add the system header include directory. But the system integrated headers and libraries are not adapted for WebAssembly. Emscripten offers all the basic headers and libraries required to build the wasm file. We can use the `--sysroot=/path/to/emscripten/cache/sysroot` instead.
+ Then we can add `-I` to append the header search directory to resolve the problem. As usual, we can add the system header include directory. But the system-integrated headers and libraries are not adapted for WebAssembly. Emscripten offers all the basic headers and libraries required to build the wasm file. We can use the `--sysroot=/path/to/emscripten/cache/sysroot` instead.
 
  ```bash
 $ /path/to/emsdk/upstream/bin/clang --target=wasm32 --sysroot /path/to/emsdk/upstream/emscripten/cache/sysroot -E hello.c -v
@@ -125,7 +125,7 @@ $ /path/to/emsdk/upstream/bin/clang --target=wasm32 --sysroot /path/to/emsdk/ups
 
 ### LLVM Intermediate Presentation (IR)
 
-It is the most important design in LLVM, that any languages compiled to IR format, could reuse the target platform code generation and assembling, with lots of optimization libraries. So WebAssembly is derived from the IR format and other LLVM-based programming languages could also easily be transformed to WebAssembly format.
+It is the most important design in LLVM, that any languages compiled to IR format, could reuse the target platform code generation and assembling, with lots of optimization libraries. So WebAssembly is derived from the IR format and other LLVM-based programming languages could also easily be transformed into WebAssembly format.
 
 ```bash
 $ /path/to/emsdk/upstream/bin/clang --target=wasm32 -I /path/to/emsdk/upstream/emscripten/cache/sysroot/include -emit-llvm -S hello.c -o hello.ll -v
@@ -138,7 +138,7 @@ $ /path/to/emsdk/upstream/bin/clang --target=wasm32 -I /path/to/emsdk/upstream/e
 
 Besides, to understand how the optimization process works, we can add `-O1`or `-O2` and check the output. If we run the command without `-emit-llvm`, we can get a pure assembly format text file.
 
-As to Emscripten, we find it adapts some header files to support WebAssembly. The wasm file is executed in a virtual machine. Currently the WebAssembly instruction set does not support some system devices and kernel interfaces. So Emscripten needs to replace these functions when compiling.
+As to Emscripten, we find it adapts some header files to support WebAssembly. The wasm file is executed in a virtual machine. Currently, the WebAssembly instruction set does not support some system devices and kernel interfaces. So Emscripten needs to replace these functions when compiling.
 
 ### Target Object File
 
@@ -150,7 +150,7 @@ $ /path/to/emsdk/upstream/bin/clang --target=wasm32 -I /path/to/emsdk/upstream/e
 
 - `-c` option will produce the target compiled object file.
 
-It produces the `hello.o` binary file, which linker could resolve the symbols with and does some optimization work in the linking stage.
+It produces a `hello.o` binary file, which the linker could resolve the symbols with and do some optimization work in the linking stage.
 
 ### Linking
 
@@ -172,19 +172,19 @@ If we look into the wasm file, we will find it has some Emscripten symbols insid
 wasm2wat hello.wasm -o hello.wat
 ```
 
-where `wasm2wat` is a tool one of [Wabt](https://github.com/WebAssembly/wabt) toolkits, which is used for transforming a wasm binary file to a human readable text format file.
+where `wasm2wat` is a tool one of [Wabt](https://github.com/WebAssembly/wabt) toolkits, which is used for transforming a wasm binary file to a human-readable text format file.
 
 ## Compile C++ to WebAssembly with Emscripten
 
-In last chapter, we have compiled C++ programs to WebAssembly with clang toolchains. Actually, Emscripten helps organize the **driver process** to generate WebAssembly files, with a python tool called `emcc.py`.
+In the last chapter, we have compiled C++ programs to WebAssembly with clang toolchains. Actually, Emscripten helps organize the **driver process** to generate WebAssembly files, with a python tool called `emcc.py`.
 
 ```bash
 $ /path/to/emsdk/upstream/emscripten/emcc.py -o hello.wasm hello.c -v
 ```
 
-the parameter `-o hello.wasm` is very important as it will not generate the JavaScript glue codes.
+The parameter `-o hello.wasm` is very important as it will not generate the JavaScript glue codes.
 
-We record the commands in `emcc`, as it shows the best practice for compiling WebAssembly with Emscripten toolchains. By following the python debugger, we find the `emcc` tool split the whole process into three main phases: `phase_compile_inputs`, `phase_link`, `phase_post_link`.
+We dumped out the commands in `emcc`, as it shows the best practice for compiling WebAssembly with Emscripten toolchains. By following the python debugger, we find the `emcc` tool split the whole process into three main phases: `phase_compile_inputs`, `phase_link`, `phase_post_link`.
 
 The compile command in `emcc`
 
@@ -240,7 +240,7 @@ Apparently, `emcc` has done a lot of optimization work in the compiling and link
 
 ### Binaryen - the post link phase
 
-Binaryen is another optimization tool integrated in Emscripten. It will extract the wasm binary file into a new AST (Abstract Syntax Tree), rather than the wasm plain stack format. Then this AST helps optimize the wasm file further in `-O3` level.
+Binaryen is another optimization tool integrated into Emscripten. It will extract the wasm binary file into a new AST (Abstract Syntax Tree), rather than the wasm plain stack format. Then this AST helps optimize the wasm file further in `-O3` level.
 
 Binaryen will not be launched unless `-O3` parameter is passed to the `emcc`.
 
@@ -276,7 +276,7 @@ int factorial(int *arr, int length) {
 }
 ```
 
-In `math.c` we define an external function `consoleLog` which is imported from JavaScript, an `alloc` function used to do memory allocation and a `factorial` function to test the operations. Then let's build the wasm file.
+In `math.c` we define an external function `consoleLog` which is imported from JavaScript, an `alloc` function used to do memory allocation, and a `factorial` function to test the operations. Then let's build the wasm file.
 
 ```bash
 $ /path/to/emsdk/upstream/bin/clang --target=wasm32 -c -o math.o -I /path/to/emsdk/upstream/emscripten/cache/sysroot/include math.c -v
@@ -355,5 +355,5 @@ result: 408146688
 In this article, we reviewed how the `emcc` script works and extracted the `clang` commands. Then by using the WebAssembly API, we can easily integrate the packaged wasm file with the front-end JavaScript code. Thanks to the `LLVM` and `WebAssembly` text format, which helps a lot in the whole debugging process. And we post some suggestions on developing C/C++ with WebAssembly.
 
 The `emcc` is a helpful tool for compiling C++ to wasm, but it's complicated to understand both `emcc` and `clang` options.
-It's better to avoid to use Emscripten to generate JavaScript glue codes. Instead we can map all the interfaces in a Module with WebAssembly Module API.
+It's better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.
 
