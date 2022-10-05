@@ -1,7 +1,7 @@
 ---
-title: "Digging into Compiling C++ to WebAssembly"
+title: "Compile C++ into WebAssembly"
 date: 2022-09-29T15:36:14+08:00
-lastmod: 2022-09-29T15:36:14+08:00
+lastmod: 2022-10-04T18:06:56-07:00
 draft: false
 keywords: []
 description: ""
@@ -20,18 +20,14 @@ reward: false
 mathjax: false
 ---
 
-The support of WebAssembly is a critical part of VGG engine, as we
-- not only compile the whole engine to WebAssembly for running in browsers;
-- but also support user-generated wasm file in combination with designs to make a whole interactive app
+The support for WebAssembly (abbreviated Wasm) is a critical part of the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is written in C++. It could be compiled into WebAssembly, so that we are able to run it in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.
 
 By definition,
 > WebAssembly is an executable binary format for a stack-based virtual machine.
 
-and there have been so many blog posts, papers, and books help us disect the WebAssembly format. However, seldom articles talk about the compiling process of C++ programs to WebAssembly. Because there is a *de-facto* tool called [Emscripten](https://emscripten.org/) which is devoted to this problem.
+There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly.
 
-And nobody seems to have interest in the underlying mechanism of Emscripten.
-
-In this article, we kept the record for digging into the compiling process from C++ to WebAssembly, thus demystifying Emscripten. Hope you enjoy it!
+In this post, we share the the process of using [Emscripten](https://emscripten.org/), a *de-facto* compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
 
 <!--more-->
 
