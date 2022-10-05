@@ -4,4 +4,4 @@
 &lt;p>WebAssembly is an executable binary format for a stack-based virtual machine.&lt;/p>
 &lt;/blockquote>
 &lt;p>There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly.&lt;/p>
-&lt;p>In this post, we share the the process of using &lt;a href="https://emscripten.org/">Emscripten&lt;/a>, a &lt;em>de-facto&lt;/em> compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!&lt;/p></description></item></channel></rss>
+&lt;p>In this post, we share the process of using &lt;a href="https://emscripten.org/">Emscripten&lt;/a>, a &lt;em>de-facto&lt;/em> compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!&lt;/p></description></item></channel></rss>
