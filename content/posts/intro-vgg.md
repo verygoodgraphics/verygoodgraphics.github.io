@@ -175,4 +175,5 @@ This post is just an introduction, and more details about VGG engine will be dis
 
 ## Contact us
 * Discord: https://discord.gg/89fFapjfgM
-<img width="615" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196367439-bc6a5a06-fec7-4331-af45-ff1da34914a7.png">
+<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
+
