@@ -456,18 +456,13 @@
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
 &lt;/div>&lt;h2 id="conclusion">Conclusion&lt;/h2>
-&lt;p>In this article, we reviewed how the &lt;code>emcc&lt;/code> script works and extracted the &lt;code>clang&lt;/code> commands. Then by using the WebAssembly API, we can easily integrate the packaged wasm file with the front-end JavaScript code. Thanks to the &lt;code>LLVM&lt;/code> and &lt;code>WebAssembly&lt;/code> text format, which helps a lot in the whole debugging process. And we post some suggestions on developing C/C++ with WebAssembly.&lt;/p>
+&lt;p>In this article, we reviewed how the &lt;code>emcc&lt;/code> script works and extracted the &lt;code>clang&lt;/code> commands. Then by using the WebAssembly API, we can easily integrate the packaged wasm file with the front-end JavaScript code. Thanks to the &lt;code>LLVM&lt;/code> and &lt;code>WebAssembly&lt;/code> text format, which helps a lot in the whole debugging process. And we post some suggestions on developing C/C++ with WebAssembly.
+The &lt;code>emcc&lt;/code> is a helpful tool for compiling C++ to wasm, but it&amp;rsquo;s complicated to understand both &lt;code>emcc&lt;/code> and &lt;code>clang&lt;/code> options.
+It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.&lt;/p>
 &lt;h2 id="contact-us">Contact us&lt;/h2>
 &lt;ul>
 &lt;li>Discord: &lt;a href="https://discord.gg/89fFapjfgM">https://discord.gg/89fFapjfgM&lt;/a>
-&lt;img width="615" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196367439-bc6a5a06-fec7-4331-af45-ff1da34914a7.png">
-The &lt;code>emcc&lt;/code> is a helpful tool for compiling C++ to wasm, but it&amp;rsquo;s complicated to understand both &lt;code>emcc&lt;/code> and &lt;code>clang&lt;/code> options.
-It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.&lt;/li>
-&lt;/ul>
-&lt;h2 id="contact-us-1">Contact us&lt;/h2>
-&lt;ul>
-&lt;li>Discord: &lt;a href="https://discord.gg/89fFapjfgM">https://discord.gg/89fFapjfgM&lt;/a>
-&lt;img width="615" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196367439-bc6a5a06-fec7-4331-af45-ff1da34914a7.png">&lt;/li>
+&lt;img width="595" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196371289-6e2b651a-e97b-4f93-adda-a9b8fa4cac58.png">&lt;/li>
 &lt;/ul>
 &lt;div class="footnotes" role="doc-endnotes">
 &lt;hr>
