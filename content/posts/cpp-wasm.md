@@ -353,6 +353,7 @@ result: 408146688
 ## Conclusion
 
 In this article, we reviewed how the `emcc` script works and extracted the `clang` commands. Then by using the WebAssembly API, we can easily integrate the packaged wasm file with the front-end JavaScript code. Thanks to the `LLVM` and `WebAssembly` text format, which helps a lot in the whole debugging process. And we post some suggestions on developing C/C++ with WebAssembly.
+
 The `emcc` is a helpful tool for compiling C++ to wasm, but it's complicated to understand both `emcc` and `clang` options.
 It's better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.
 
