@@ -358,5 +358,5 @@ It's better to avoid using Emscripten to generate JavaScript glue codes. Instead
 
 ## Contact us
 * Discord: https://discord.gg/89fFapjfgM
-<img width="595" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196371289-6e2b651a-e97b-4f93-adda-a9b8fa4cac58.png">
+<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
 
