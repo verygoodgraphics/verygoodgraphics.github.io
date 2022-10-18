@@ -172,3 +172,8 @@ In this post, we have discussed about the Web technologies, platform-specific fr
 We proposed Design-as-Code concept for escaping from the HTML world, and introduced VGG as a brand-new engine and framework of D-a-C for developing interactive applications. But VGG is not finished yet, as many technical challenges needs to be overcome first.
 
 This post is just an introduction, and more details about VGG engine will be discussed in later posts. If you have interests, please keep an eye our official [blog](https://blog.verygoodgraphics.com/) and our open-sourced version of VGG [engine](https://github.com/verygoodgraphics/vgg_runtime).
+
+## Contact us
+* Discord: https://discord.gg/89fFapjfgM
+<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
+

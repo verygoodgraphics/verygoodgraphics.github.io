@@ -357,3 +357,7 @@ In this article, we reviewed how the `emcc` script works and extracted the `clan
 The `emcc` is a helpful tool for compiling C++ to wasm, but it's complicated to understand both `emcc` and `clang` options.
 It's better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.
 
+## Contact us
+* Discord: https://discord.gg/89fFapjfgM
+<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
+
