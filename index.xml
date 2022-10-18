@@ -764,6 +764,11 @@ style="max-width:80%" >
 &lt;li>&lt;a href="https://github.com/amzeratul/halley">halley&lt;/a> engine, which is a game engine that successfully shipped a game called &lt;a href="https://store.steampowered.com/app/607050/_/">Wargroove&lt;/a>, implements a &lt;a href="https://github.com/amzeratul/halley/tree/develop/src/engine/entity/include/halley/entity">custom&lt;/a> ECS architecture&lt;/li>
 &lt;/ul>
 &lt;p>VGG engine does not use a baked ECS framework like EnTT or flecs but chooses to implement one on our own, just like what halley has done. This is because we believe a tailored version better suits our use cases, particularly for programming GUI applications. Currently, VGG implements a simple ECS architecture that still lacks some features, but the inner iteration is happening. If you like the concept of &lt;a href="https://blog.verygoodgraphics.com/posts/intro-vgg/">Design-as-Code&lt;/a> as well as the ECS architecture, you can keep an eye on our &lt;a href="https://github.com/verygoodgraphics/vgg_runtime">open-sourced&lt;/a> version.&lt;/p>
+&lt;h2 id="contact-us">Contact us&lt;/h2>
+&lt;ul>
+&lt;li>Discord: &lt;a href="https://discord.gg/89fFapjfgM">https://discord.gg/89fFapjfgM&lt;/a>
+&lt;img width="615" alt="Group-Eng" src="https://user-images.githubusercontent.com/111478642/196367439-bc6a5a06-fec7-4331-af45-ff1da34914a7.png">&lt;/li>
+&lt;/ul>
 &lt;div class="footnotes" role="doc-endnotes">
 &lt;hr>
 &lt;ol>
