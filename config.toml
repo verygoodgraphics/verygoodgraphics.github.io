@@ -3,6 +3,9 @@ baseURL = "https://blog.verygoodgraphics.com/"
 languageCode = "en-us"
 theme = ["jane"]
 
+relativeURLs = true
+canonifyURLs = true
+
 enableRobotsTXT = true
 enableEmoji = true
 enableGitInfo = true
@@ -22,10 +25,10 @@ pygmentsOptions = "linenos=table"
 
 # language support # en / zh-cn / other... translations present in i18n/
 defaultContentLanguage = "en" # Default language to use
-# [langusges]
-# [languages.en]
-# title = "Very Good Graphics Blog"
-# languageName = "English"
+[langusges]
+[languages.en]
+title = "Very Good Graphics Blog"
+languageName = "English"
 # [languages.zh-cn]
 # title = "Very Good Graphics Blog"
 # languageName = "中文"
@@ -35,6 +38,7 @@ defaultContentLanguage = "en" # Default language to use
 #   weight = 10
 #   identifier = "blog"
 #   url = "/"
+
 [[menu.main]]
 name = "All Posts"
 weight = 20
