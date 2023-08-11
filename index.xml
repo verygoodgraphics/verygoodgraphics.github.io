@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Very Good Graphics Blog</title><link>https://blog.verygoodgraphics.com/</link><description>Recent content on Very Good Graphics Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>VeryGoodGraphics</copyright><lastBuildDate>Thu, 29 Sep 2022 15:36:14 +0800</lastBuildDate><atom:link href="https://blog.verygoodgraphics.com/index.xml" rel="self" type="application/rss+xml"/><item><title>Compile C++ into WebAssembly</title><link>https://blog.verygoodgraphics.com/posts/cpp-wasm/</link><pubDate>Thu, 29 Sep 2022 15:36:14 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/cpp-wasm/</guid><description>&lt;p>The support for WebAssembly (abbreviated Wasm) is a critical part of the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is written in C++. It could be compiled into WebAssembly, so that we are able to run it in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Very Good Graphics Blog</title><link>https://blog.verygoodgraphics.com/</link><description>Recent content on Very Good Graphics Blog</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>VeryGoodGraphics</copyright><lastBuildDate>Thu, 29 Sep 2022 15:36:14 +0800</lastBuildDate><atom:link href="https://blog.verygoodgraphics.com/index.xml" rel="self" type="application/rss+xml"/><item><title>Compile C++ into WebAssembly</title><link>https://blog.verygoodgraphics.com/posts/cpp-wasm/</link><pubDate>Thu, 29 Sep 2022 15:36:14 +0800</pubDate><guid>https://blog.verygoodgraphics.com/posts/cpp-wasm/</guid><description>&lt;p>The support for WebAssembly (abbreviated Wasm) is a critical part of the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is written in C++. It could be compiled into WebAssembly, so that we are able to run it in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.&lt;/p>
 &lt;p>By definition,&lt;/p>
 &lt;blockquote>
 &lt;p>WebAssembly is an executable binary format for a stack-based virtual machine.&lt;/p>
@@ -580,15 +580,15 @@ It&amp;rsquo;s better to avoid using Emscripten to generate JavaScript glue code
 &lt;/ul>
 &lt;h2 id="the-essence-of-gui">The Essence of GUI&lt;/h2>
 &lt;p>We already have a rough impression of ECS, and now it&amp;rsquo;s time for discussing GUI. But let&amp;rsquo;s start with a game. A game may consist of many entities, including rivers, mountains, players, NPCs, monsters, etc. These entities usually have no relationships, or more specifically, no hierarchical relationships. In contrast, a GUI is essentially a tree of entities, where hierarchy must be imposed.&lt;/p>
-&lt;link rel="stylesheet" href="https://blog.verygoodgraphics.com/css/hugo-easy-gallery.css" />
+&lt;link rel="stylesheet" href="./css/hugo-easy-gallery.css" />
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
 itemscope itemtype="http://schema.org/ImageObject"
 style="max-width:50%" >
 &lt;div class="img">
-&lt;img itemprop="thumbnail" src="https://blog.verygoodgraphics.com/images/simple-dialog.png" />
+&lt;img itemprop="thumbnail" src="./images/simple-dialog.png" />
 &lt;/div>
-&lt;a href="https://blog.verygoodgraphics.com/images/simple-dialog.png" itemprop="contentUrl">&lt;/a>
+&lt;a href="./images/simple-dialog.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
 &lt;p>As you can see, the simple dialog above can be divided into three parts: title, content, and the button group. The button group contains another two buttons. So the tree looks like this&lt;/p>
@@ -618,9 +618,9 @@ style="max-width:50%" >
 itemscope itemtype="http://schema.org/ImageObject"
 style="max-width:100%" >
 &lt;div class="img">
-&lt;img itemprop="thumbnail" src="https://blog.verygoodgraphics.com/images/maya.png" />
+&lt;img itemprop="thumbnail" src="./images/maya.png" />
 &lt;/div>
-&lt;a href="https://blog.verygoodgraphics.com/images/maya.png" itemprop="contentUrl">&lt;/a>
+&lt;a href="./images/maya.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
 &lt;p>We&amp;rsquo;ll figure out the answers in the next chapter.&lt;/p>
@@ -675,9 +675,9 @@ style="max-width:100%" >
 itemscope itemtype="http://schema.org/ImageObject"
 style="max-width:100%" >
 &lt;div class="img">
-&lt;img itemprop="thumbnail" src="https://blog.verygoodgraphics.com/images/ecs-query.png" />
+&lt;img itemprop="thumbnail" src="./images/ecs-query.png" />
 &lt;/div>
-&lt;a href="https://blog.verygoodgraphics.com/images/ecs-query.png" itemprop="contentUrl">&lt;/a>
+&lt;a href="./images/ecs-query.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
 &lt;p>If we visualize this process, we will find out that the query is &lt;strong>horizontal&lt;/strong>. It doesn&amp;rsquo;t matter whether there is a hierarchy or not because of possibly flattened storage and indirection of the relationship.&lt;/p>
@@ -722,9 +722,9 @@ style="max-width:100%" >
 itemscope itemtype="http://schema.org/ImageObject"
 style="max-width:80%" >
 &lt;div class="img">
-&lt;img itemprop="thumbnail" src="https://blog.verygoodgraphics.com/images/chrome-pipeline.avif" />
+&lt;img itemprop="thumbnail" src="./images/chrome-pipeline.avif" />
 &lt;/div>
-&lt;a href="https://blog.verygoodgraphics.com/images/chrome-pipeline.avif" itemprop="contentUrl">&lt;/a>
+&lt;a href="./images/chrome-pipeline.avif" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
 &lt;p>A single node entity could be reused across multiple trees, as long as multiple relationship component is added to the entity, which is exactly what ECS excels at.&lt;/p>
@@ -768,7 +768,7 @@ style="max-width:80%" >
 &lt;li>&lt;a href="https://github.com/SanderMertens/flecs">flecs&lt;/a> is implemented with a traditional &lt;a href="https://ajmmertens.medium.com/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9">archtype&lt;/a> method, where the addition and deletion of a component could be a theoretical performance bottleneck in common scenarios.&lt;/li>
 &lt;li>&lt;a href="https://github.com/amzeratul/halley">halley&lt;/a> engine, which is a game engine that successfully shipped a game called &lt;a href="https://store.steampowered.com/app/607050/_/">Wargroove&lt;/a>, implements a &lt;a href="https://github.com/amzeratul/halley/tree/develop/src/engine/entity/include/halley/entity">custom&lt;/a> ECS architecture&lt;/li>
 &lt;/ul>
-&lt;p>VGG engine does not use a baked ECS framework like EnTT or flecs but chooses to implement one on our own, just like what halley has done. This is because we believe a tailored version better suits our use cases, particularly for programming GUI applications. Currently, VGG implements a simple ECS architecture that still lacks some features, but the inner iteration is happening. If you like the concept of &lt;a href="https://blog.verygoodgraphics.com/posts/intro-vgg/">Design-as-Code&lt;/a> as well as the ECS architecture, you can keep an eye on our &lt;a href="https://github.com/verygoodgraphics/vgg_runtime">open-sourced&lt;/a> version.&lt;/p>
+&lt;p>VGG engine does not use a baked ECS framework like EnTT or flecs but chooses to implement one on our own, just like what halley has done. This is because we believe a tailored version better suits our use cases, particularly for programming GUI applications. Currently, VGG implements a simple ECS architecture that still lacks some features, but the inner iteration is happening. If you like the concept of &lt;a href="./posts/intro-vgg/">Design-as-Code&lt;/a> as well as the ECS architecture, you can keep an eye on our &lt;a href="https://github.com/verygoodgraphics/vgg_runtime">open-sourced&lt;/a> version.&lt;/p>
 &lt;h2 id="contact-us">Contact us&lt;/h2>
 &lt;ul>
 &lt;li>Discord: &lt;a href="https://discord.gg/89fFapjfgM">https://discord.gg/89fFapjfgM&lt;/a>
@@ -810,15 +810,15 @@ style="max-width:80%" >
 &lt;p>It is very interesting. Because HTML, short for &lt;code>Hyper Text Markup Language&lt;/code>, was originally invented thirty years ago for making &lt;strong>linkable&lt;/strong> documents, rather than apps. It is more about &lt;strong>markup&lt;/strong> than a language. The majority doesn&amp;rsquo;t even take writing HTML as programming, since it is not a programming language at all.&lt;/p>
 &lt;p>It was not until the advent of HTML5, which is commonly referred to as &lt;strong>H5&lt;/strong>, together with CSS3 and modern versions of JavaScript, that people were starting to make &lt;strong>real&lt;/strong> Web apps.&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>&lt;/p>
 &lt;p>And thanks to the optimization team of browser vendors, nowadays the performance of JavaScript gains the magnitude-level improvements so that the &lt;strong>interactive&lt;/strong> web apps won&amp;rsquo;t be bottle-necked.&lt;/p>
-&lt;link rel="stylesheet" href="https://blog.verygoodgraphics.com/css/hugo-easy-gallery.css" />
+&lt;link rel="stylesheet" href="./css/hugo-easy-gallery.css" />
 &lt;div class="box">
 &lt;figure itemprop="associatedMedia"
 itemscope itemtype="http://schema.org/ImageObject"
 style="max-width:50%" >
 &lt;div class="img">
-&lt;img itemprop="thumbnail" src="https://blog.verygoodgraphics.com/images/js-perf-his.png" />
+&lt;img itemprop="thumbnail" src="./images/js-perf-his.png" />
 &lt;/div>
-&lt;a href="https://blog.verygoodgraphics.com/images/js-perf-his.png" itemprop="contentUrl">&lt;/a>
+&lt;a href="./images/js-perf-his.png" itemprop="contentUrl">&lt;/a>
 &lt;/figure>
 &lt;/div>
 &lt;p>Do you remember this famous picture? It&amp;rsquo;s from &lt;a href="https://hacks.mozilla.org/2017/02/a-cartoon-intro-to-webassembly/">Lin Clark&lt;/a> when she tries to introduce the performance history of JavaScript. The performance started to boost from 2008 and is still not reaching the end.&lt;/p>
