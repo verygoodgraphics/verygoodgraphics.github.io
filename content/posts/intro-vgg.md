@@ -20,7 +20,7 @@ reward: false
 mathjax: false
 ---
 
-VGG is yet another engine and framework for making interactive apps, which emphasizes the concept of *Design-as-Code* at its core. And it may hopefully unite the worlds of design and code at last.
+VGG is yet another engine and framework for making interactive apps, which emphasizes the concept of _Design-as-Code_ at its core. And it may hopefully unite the worlds of design and code at last.
 
 Meanwhile, the whole world is about using Web technologies, platform-specific frameworks, or cross-platform frameworks, to make apps, the most famous and innovative among them being [Flutter](https://flutter.dev/), which takes advantage of underlying parts of browser engine to achieve the goal of "Write Once, Run Anywhere"[^wora].
 
@@ -72,13 +72,14 @@ What else do we have?
 
 - Some are platform-specific frameworks since the beginning of golden ages, like MFC for Windows, Cocoa for macOS, and GTK for UNIX/Linux. And others are modern mobile toolkits like those specifically made for iOS, Android, or other mobile operating systems.
 
-- The cross-platform frameworks, notably the widely-adopted Qt Framework. But it is mainly used for non-mobile/non-web environments. The *cross-platform* here means crossing desktop OS initially, while endeavour is still being put into mobile/web targets for those frameworks.
+- The cross-platform frameworks, notably the widely-adopted Qt Framework. But it is mainly used for non-mobile/non-web environments. The _cross-platform_ here means crossing desktop OS initially, while endeavour is still being put into mobile/web targets for those frameworks.
 
 - Upcoming brand-new solutions like Flutter, which is a mobile-first cross-platform framework, and is promising for web and desktop as well.
 
 As the ratio of web apps is increasing over the years, the platform-specific or cross-platform frameworks mentioned above are less used since they are often targeting traditional desktop applications.
 
-And the developer experience is even worse than writing HTML because they may be obliged to write *imperative* and *object-oriented* code like this[^coderef][^qtdesigner],
+And the developer experience is even worse than writing HTML because they may be obliged to write _imperative_ and _object-oriented_ code like this[^coderef][^qtdesigner],
+
 ```
 var count = 0
 let stack = new VStack
@@ -93,6 +94,7 @@ stack.add_child(button)
 ```
 
 rather than writing **declarative** and possibly **reactive** code that programmer always dreams of, like this.[^coderef]
+
 ```
 struct AppState {
     count: i32
@@ -106,10 +108,11 @@ VStack {
 }
 ```
 
-[^coderef]: Code samples taken from Raph Levien's [*Towards a unified theory of reactive UI*](https://raphlinus.github.io/ui/druid/2019/11/22/reactive-ui.html)
+[^coderef]: Code samples taken from Raph Levien's [_Towards a unified theory of reactive UI_](https://raphlinus.github.io/ui/druid/2019/11/22/reactive-ui.html)
 [^qtdesigner]: But there is Qt Designer that will do the dirty work for Qt developers.
 
 That's why Flutter seems like a silver-bullet for developing apps:
+
 - It is declarative and reactive in nature.
 - It is truly cross-platform for making all of desktop, mobile, and web apps.
 
@@ -128,12 +131,14 @@ Wait... What? Writing HTML again in non-web frameworks[^rn]?
 No, no more writing HTML!
 
 Still, we have to admit that HTML+CSS is a good combination to represent UI, as
+
 - HTML is responsible for the structure of the content,
 - and CSS is individually responsible for the style of the content.
 
 So that structure and style are de-coupled, which is good for engineering. The premise is that the engineering is necessary, however.
 
 In practice, the engineering of UI is sometimes meaningless and unnecessary. Suppose we already have a high-fidelity design prototype given by designers, and what coders need to do next is
+
 1. Re-implement the design prototype using code, which is HTML+CSS stuff in 99% cases.
 2. Add business logic to the UI he or she just re-implemented.
 
@@ -163,7 +168,7 @@ The obvious advantage is that the designing and developing of graphical UI needs
 
 As for developer, he or she is able to build business logic directly on the design prototype, which is then runnable by VGG engine as a whole, like a real application. This will save a lot of duplicated work so as to increase the work efficiency not only for developer but also for the whole team.
 
-The concept of *Design-as-Code* is simple, however, it faces many challenges, including those in compiler, programming languages and computer graphics, and the last of which is where the name of VGG came from. VGG is short for *Very Good Graphics*, because it is initially just a design rendering engine. As it develops, more and more interesting ideas and experiments are carried out in the engine, and it turns out to be a brand-new framework for developing interactive applications.
+The concept of _Design-as-Code_ is simple, however, it faces many challenges, including those in compiler, programming languages and computer graphics, and the last of which is where the name of VGG came from. VGG is short for _Very Good Graphics_, because it is initially just a design rendering engine. As it develops, more and more interesting ideas and experiments are carried out in the engine, and it turns out to be a brand-new framework for developing interactive applications.
 
 ## Conclusion
 
@@ -174,6 +179,6 @@ We proposed Design-as-Code concept for escaping from the HTML world, and introdu
 This post is just an introduction, and more details about VGG engine will be discussed in later posts. If you have interests, please keep an eye our official [blog](https://blog.verygoodgraphics.com/) and our open-sourced version of VGG [engine](https://github.com/verygoodgraphics/vgg_runtime).
 
 ## Contact us
-* Discord: https://discord.gg/89fFapjfgM
-<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
 
+- Discord: https://discord.gg/g3HJuKP54D
+  <img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">

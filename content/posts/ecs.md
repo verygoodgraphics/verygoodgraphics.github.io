@@ -30,13 +30,14 @@ That's why the VGG engine takes ECS as the fundamental architecture because VGG 
 
 Let's first talk about ECS. There are already many descriptions of ECS around the internet so we just skip the rigorous but give a one-sentence definition.
 
-> ECS is about entities[^entity] *composed* of different types of component whose data are manipulated by one or more systems.
+> ECS is about entities[^entity] _composed_ of different types of component whose data are manipulated by one or more systems.
 
 [^entity]: An entity can be as simple as an ID, or as complex as a universal container. It doesn't matter, as long as it has the semantics of putting components together, where real data live in.
 
-And the essence of ECS is *composition*, with obvious advantages over the *inheritance* in Object-Oriented-Programming.
+And the essence of ECS is _composition_, with obvious advantages over the _inheritance_ in Object-Oriented-Programming.
 
-In OOP, inheritance is one of three principles, the other two being *encapsulation* and *polymorphism*. Inheritance is regarded as a technique for reusing data and functions, for example, as mountain bike is a kind of bike, the `MountainBike` class shall inherit all the data of the `Bike` class as follows
+In OOP, inheritance is one of three principles, the other two being _encapsulation_ and _polymorphism_. Inheritance is regarded as a technique for reusing data and functions, for example, as mountain bike is a kind of bike, the `MountainBike` class shall inherit all the data of the `Bike` class as follows
+
 ```cpp
 struct Bike : public Vehicle {
   Frame  frame;
@@ -55,10 +56,11 @@ struct MountainBike : public Bike {
 And when an instance is created out of `MountainBike` type, this instance will have all the data in `Bike` type plus all that of its ancestors. In this way, the data together with member functions can be reused in derived types or instances.
 
 However, this leads to many headaches, just to name a few
-- __Overhead of virtual functions__: extra runtime cost of virtual table and virtual pointers, let alone some unexpected overriding pitfalls
-- __The diamond problem in multiple inheritances__: ambiguous overridden data and functions from multiple ancestors
-- __Dynamic type castings__: performance bottleneck of `dynamic_cast` for casting base pointer to derived pointer
-- __Complex inheritance chains__: in order to model for real-world problems, complex inheritance relationships has to be designed which would look daunting for newcomers
+
+- **Overhead of virtual functions**: extra runtime cost of virtual table and virtual pointers, let alone some unexpected overriding pitfalls
+- **The diamond problem in multiple inheritances**: ambiguous overridden data and functions from multiple ancestors
+- **Dynamic type castings**: performance bottleneck of `dynamic_cast` for casting base pointer to derived pointer
+- **Complex inheritance chains**: in order to model for real-world problems, complex inheritance relationships has to be designed which would look daunting for newcomers
 
 And the developer needs to know the [Object-Model](https://www.oreilly.com/library/view/inside-the-c/0201834545/) well to write memory-safe and performant C++ code, and sometimes he needs to resort to exotic programming idoms such as CRTP[^crtp] or SFINAE[^sfinae] for even better performance.
 
@@ -66,6 +68,7 @@ And the developer needs to know the [Object-Model](https://www.oreilly.com/libra
 [^sfinae]: SFINAE stands for Substitution-Failure-Is-Not-An-Error
 
 The complexity disappears when we use composition with ECS architecture. If we want to create a new class for `MountainBike`, we needn't inherit from `Bike`, but only need to describe the unique data fields a mountain bike will have. When we need an entity for a mountain bike, we could push both instances of `BikeComponent` and `MountainBikeComponent` into the entity, which are renamed from `Bike` and `MountainBike` respectively without an inheritance relationship.
+
 ```cpp
 make_entity()
   .push(BikeComponent{
@@ -92,7 +95,8 @@ As to systems, which can be as simple as a function, would manipulate those data
 
 where components represent data structures and systems represents algorithm. The programming suddenly becomes easier and clearer since no more traps are hiding behind various advanced concepts, to be more specific, no more extra runtime cost due to how the compiler implements inheritance, and no more ambiguity issues due to multiple inheritances.
 
-As a matter of fact, ECS is a bit like [Trait](https://en.wikipedia.org/wiki/Trait_(computer_programming)), since a trait contains a set of functions, and both of them emphasize the concept of composition. However, a trait class cannot have member data, whereas a component could be more than a POD[^pod] type. All in all, ECS is an architectural design pattern, having no hard constraints on programming, so
+As a matter of fact, ECS is a bit like [Trait](<https://en.wikipedia.org/wiki/Trait_(computer_programming)>), since a trait contains a set of functions, and both of them emphasize the concept of composition. However, a trait class cannot have member data, whereas a component could be more than a POD[^pod] type. All in all, ECS is an architectural design pattern, having no hard constraints on programming, so
+
 - A component type is free to have inheritance relationships with another component type;
 - A component type is also free to have both data and member functions[^sysfunc].
 
@@ -106,6 +110,7 @@ We already have a rough impression of ECS, and now it's time for discussing GUI.
 {{< figure src="/images/simple-dialog.png" width="50%" >}}
 
 As you can see, the simple dialog above can be divided into three parts: title, content, and the button group. The button group contains another two buttons. So the tree looks like this
+
 ```
 Dialog
 ├── Title
@@ -117,7 +122,7 @@ Dialog
 
 where the title and content are instances of text widget[^widget], button group is of layout widget, and buttons are of the button widget. If we see each widget as an entity, these widgets comprise a hierarchical entity tree.
 
-[^widget]: In Web programming, specifically React-based web programming, we have another *component* concept, which actually means reusable GUI widgets. To distinguish from our *component* concept in ECS, we just call this reusable GUI component __widget__.
+[^widget]: In Web programming, specifically React-based web programming, we have another _component_ concept, which actually means reusable GUI widgets. To distinguish from our _component_ concept in ECS, we just call this reusable GUI component **widget**.
 
 So the [initial problem](#initial-problem) becomes, would the ECS architecture be suitable for modeling such a hierarchical system?
 
@@ -136,6 +141,7 @@ Different ECS libraries have a huge discrepancy concerning the implementation de
 ### Horizontal Query
 
 Let's have a look at the adapted code snippets from the most famous C++ ECS framework [`EnTT`](https://github.com/skypjack/entt)
+
 ```cpp
 void update(entt::registry &registry) {
     auto view = registry.view<position, const velocity>();
@@ -163,6 +169,7 @@ In the above code, the `update` is a simple system, which the developer could ut
 If we visualize this process, we will find out that the query is **horizontal**. It doesn't matter whether there is a hierarchy or not because of possibly flattened storage and indirection of the relationship.
 
 Horizontal queries are common in video game programming, but also exist in GUI applications. Let's have a look at the following example.
+
 ```html
 <div id="entity-a" class="entity">
   <div class="position-component"></div>
@@ -180,7 +187,7 @@ Say, if we want to mimic the CSS selector behavior during GUI programming, we ca
 
 ### Vertical Query
 
-Compared to horizontal query, vertical query focus on querying *entities*, rather than *components*. So vertical query cares about a specific *named* entity, looking into the internals and finding all the components of it.
+Compared to horizontal query, vertical query focus on querying _entities_, rather than _components_. So vertical query cares about a specific _named_ entity, looking into the internals and finding all the components of it.
 
 Let's still take the dialog example for discussion. In order to start iterating through the entity tree, we need to find the root entity, namely the `dialog entity` in this example. After that, we search for what components this entity has, or which children it holds, then possibly recurring into each of the children for further investigations.
 
@@ -201,7 +208,7 @@ A single node entity could be reused across multiple trees, as long as multiple 
 
 ### Event Mechanism
 
-In *interactive* GUI applications, how the architecture handles interactions is quite important, which is what we call the event mechanism. The *signal* concept, taken equally as the *event* concept, would be just called event in our context.
+In _interactive_ GUI applications, how the architecture handles interactions is quite important, which is what we call the event mechanism. The _signal_ concept, taken equally as the _event_ concept, would be just called event in our context.
 
 Strictly speaking, the event mechanism should not be part of ECS architecture, but as it plays an important role in interactive apps and games so good support of it is common in ECS frameworks. For example, the EnTT library proposed [four distinct concepts](https://skypjack.github.io/entt/md_docs_md_signal.html) for the entire event mechanism, namely the delegate, the signal, the dispatcher, and the emitter.
 
@@ -212,7 +219,7 @@ We won't bother with those abstract concepts but just describe what we expected 
   - The outer events, which are user-generated events like mice and keyboards events, plus user-defined events which could be freely sent from one entity to another
 - The ability to send events to multiple entities, like broadcasting or multicasting messages in a network, and possibly across different threads or processes.
 - The ability to respond to those events, using pre-registered callbacks for each type of event, which itself could be dynamically added or removed
-	- The responding process, a.k.a. invoking callbacks, should be asynchronous, which means it won't make GUI unresponsible. Note this is orthogonal to multi-threading since even a single thread is capable of parallel computing using techniques like coroutine.
+  - The responding process, a.k.a. invoking callbacks, should be asynchronous, which means it won't make GUI unresponsible. Note this is orthogonal to multi-threading since even a single thread is capable of parallel computing using techniques like coroutine.
 - The ability to queue, delay, filter, and even compose events for more complicated behaviors
 
 More descriptions are welcome but the above abilities should be sufficient for a simple GUI framework.
@@ -241,6 +248,7 @@ And also please remember, VGG is utilizing designs as the base of a GUI. A commo
 In this article, we have discussed the essence of ECS architecture and GUI, and elaborated on several use cases of ECS in GUI programming. This is a very big and deep topic so it is impossible to cover everything in a single post, for instance, we haven't mentioned concrete implementation details of such an ECS architecture specialized for GUI programming.
 
 There are many good ECS implementations around the internet, for example
+
 - [EnTT](https://github.com/skypjack/entt) is implemented with a custom [sparse-set](https://github.com/skypjack/entt/blob/master/src/entt/entity/sparse_set.hpp) data structure.
 - [flecs](https://github.com/SanderMertens/flecs) is implemented with a traditional [archtype](https://ajmmertens.medium.com/building-an-ecs-2-archetypes-and-vectorization-fe21690805f9) method, where the addition and deletion of a component could be a theoretical performance bottleneck in common scenarios.
 - [halley](https://github.com/amzeratul/halley) engine, which is a game engine that successfully shipped a game called [Wargroove](https://store.steampowered.com/app/607050/_/), implements a [custom](https://github.com/amzeratul/halley/tree/develop/src/engine/entity/include/halley/entity) ECS architecture
@@ -248,5 +256,6 @@ There are many good ECS implementations around the internet, for example
 VGG engine does not use a baked ECS framework like EnTT or flecs but chooses to implement one on our own, just like what halley has done. This is because we believe a tailored version better suits our use cases, particularly for programming GUI applications. Currently, VGG implements a simple ECS architecture that still lacks some features, but the inner iteration is happening. If you like the concept of [Design-as-Code](/posts/intro-vgg/) as well as the ECS architecture, you can keep an eye on our [open-sourced](https://github.com/verygoodgraphics/vgg_runtime) version.
 
 ## Contact us
-* Discord: https://discord.gg/89fFapjfgM
-<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
+
+- Discord: https://discord.gg/g3HJuKP54D
+  <img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
