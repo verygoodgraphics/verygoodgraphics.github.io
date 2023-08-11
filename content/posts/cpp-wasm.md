@@ -23,11 +23,12 @@ mathjax: false
 The support for WebAssembly (abbreviated Wasm) is a critical part of the VGG engine. Due to performance and cross-platform support considerations, the VGG engine is written in C++. It could be compiled into WebAssembly, so that we are able to run it in browsers. More importantly, it also supports user-generated Wasm files to be plugged into the designs.
 
 By definition,
+
 > WebAssembly is an executable binary format for a stack-based virtual machine.
 
 There have been plenty of previous work, including blog posts, papers, books, etc, that help us understand the WebAssembly format. However, few of them focus on the compiling process of C++ to WebAssembly.
 
-In this post, we share the process of using [Emscripten](https://emscripten.org/), a *de-facto* compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
+In this post, we share the process of using [Emscripten](https://emscripten.org/), a _de-facto_ compiler toolchain for WebAssembly, to compile C++ code into WebAssembly. Hope you enjoy it!
 
 <!--more-->
 
@@ -35,7 +36,7 @@ In this post, we share the process of using [Emscripten](https://emscripten.org/
 
 Let's start the story with JVM[^jvm], the most famous virtual machine in programming history. JVM-based languages are a collection of languages that obey the JVM specification, including Java, Clojure, Scala, and Kotlin, so that they can run on JVM without cross-platform issues, while getting the power of JVM including GC[^gc], exception handling, multithreading, atomic operands, etc.
 
-WebAssembly format actually borrows a lot from the JVM specification. Some details can be peeked in the paper *Bringing the Web up to Speed with WebAssembly*[^wasm-paper]. The authors also implemented a virtual machine to execute the WebAssembly format. As long as a programming language could be compiled into WebAssembly, it can be executed in this WebAssembly virtual machine. This is exactly what JVM does.
+WebAssembly format actually borrows a lot from the JVM specification. Some details can be peeked in the paper _Bringing the Web up to Speed with WebAssembly_[^wasm-paper]. The authors also implemented a virtual machine to execute the WebAssembly format. As long as a programming language could be compiled into WebAssembly, it can be executed in this WebAssembly virtual machine. This is exactly what JVM does.
 
 [^jvm]: Short for Java-Virtual-Machine
 [^gc]: Short for Garbage-Collection
@@ -113,15 +114,15 @@ ignoring nonexistent directory "/include"
 #include "..." search starts here:
 #include <...> search starts here:
  /path/to/emsdk/upstream/lib/clang/15.0.0/include
- ```
+```
 
- Then we can add `-I` to append the header search directory to resolve the problem. As usual, we can add the system header include directory. But the system-integrated headers and libraries are not adapted for WebAssembly. Emscripten offers all the basic headers and libraries required to build the wasm file. We can use the `--sysroot=/path/to/emscripten/cache/sysroot` instead.
+Then we can add `-I` to append the header search directory to resolve the problem. As usual, we can add the system header include directory. But the system-integrated headers and libraries are not adapted for WebAssembly. Emscripten offers all the basic headers and libraries required to build the wasm file. We can use the `--sysroot=/path/to/emscripten/cache/sysroot` instead.
 
- ```bash
+```bash
 $ /path/to/emsdk/upstream/bin/clang --target=wasm32 --sysroot /path/to/emsdk/upstream/emscripten/cache/sysroot -E hello.c -v
- ```
+```
 
- `--sysroot` is only required with option `--target=wasm32`. So we can not use it in the normal C++ compilation process, otherwise it fails.
+`--sysroot` is only required with option `--target=wasm32`. So we can not use it in the normal C++ compilation process, otherwise it fails.
 
 ### LLVM Intermediate Presentation (IR)
 
@@ -168,6 +169,7 @@ $ /path/to/emsdk/upstream/bin/wasm-ld -o hello.wasm hello.o -L/path/to/emsdk/ups
 - `--no-entry` is used to avoid `entry symbol not defined _start` error.
 
 If we look into the wasm file, we will find it has some Emscripten symbols inside.
+
 ```
 wasm2wat hello.wasm -o hello.wat
 ```
@@ -305,36 +307,40 @@ Then we add the following code in a file `index.html`
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <meta charset="UTF-8">
-   <title>Title</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <script>
+      fetch("math-v1.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) =>
+          WebAssembly.instantiate(bytes, {
+            env: {
+              consoleLog: function (arg) {
+                console.log(arg);
+              },
+            },
+          })
+        )
+        .then((target) => {
+          const ptr = target.instance.exports.alloc(10);
+          const memory = new Int32Array(
+            target.instance.exports.memory.buffer,
+            ptr,
+            40
+          );
+          memory[0] = 2;
+          memory[1] = 3;
+          console.log("ptr = %d", ptr);
 
-<script>
-   fetch("math-v1.wasm").then(response => response.arrayBuffer())
-       .then(bytes => WebAssembly.instantiate(bytes, {
-           env: {
-               consoleLog: function (arg) {
-                   console.log(arg);
-               }
-           }
-       }))
-       .then(target => {
-           const ptr = target.instance.exports.alloc(10);
-           const memory = new Int32Array(target.instance.exports.memory.buffer, ptr, 40);
-           memory[0] = 2;
-           memory[1] = 3;
-           console.log("ptr = %d", ptr);
-
-           const result = target.instance.exports.factorial(ptr, 8);
-           console.log("result: %d", result);
-       });
-</script>
-
-</body>
+          const result = target.instance.exports.factorial(ptr, 8);
+          console.log("result: %d", result);
+        });
+    </script>
+  </body>
 </html>
-
 ```
 
 Open the `index.html` in chrome and we can get the output in the console.
@@ -358,6 +364,6 @@ The `emcc` is a helpful tool for compiling C++ to wasm, but it's complicated to 
 It's better to avoid using Emscripten to generate JavaScript glue codes. Instead, we can map all the interfaces in a Module with WebAssembly Module API.
 
 ## Contact us
-* Discord: https://discord.gg/89fFapjfgM
-<img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
 
+- Discord: https://discord.gg/g3HJuKP54D
+  <img width="595" alt="Group-Eng 16 59 55" src="https://user-images.githubusercontent.com/111478642/196389211-64cfa786-dd66-4ae0-b7ec-b81e04ac274f.png">
